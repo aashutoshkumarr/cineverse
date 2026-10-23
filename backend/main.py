@@ -45,6 +45,17 @@ class WatchItem(BaseModel):
     rating: Optional[float] = 7.5
     media_type: Optional[str] = "movie"
 
+class ProgressUpdate(BaseModel):
+    progress_seconds: float
+    duration_seconds: float
+
+class CustomStreamInput(BaseModel):
+    tmdb_id: int
+    title: str
+    playback_type: str = "hls"
+    playback_url: str
+    subtitles: Optional[str] = None
+
 @app.get("/api/health")
 def health():
     return {"status": "ok", "total_catalog": len(CATALOG)}
@@ -79,10 +90,47 @@ def get_movies(
 
 @app.get("/api/shelves")
 def get_shelves():
-    """Returns curated shelves for the Netflix/NetMirror home view."""
+    """Returns curated shelves for the Netflix/NetMirror home view with ML & Resume integration."""
     def take(items, n=10):
         return items[:n]
 
+    shelves = []
+
+    # 1. Continue Watching Shelf (if user has watch history with progress)
+    history = db.get_history(10)
+    continue_watching = [
+        {
+            **h,
+            "id": h["tmdb_id"],
+            "progress_percent": round((h.get("progress_seconds", 0) / max(h.get("duration_seconds", 1), 1)) * 100, 1)
+        }
+        for h in history if h.get("progress_seconds", 0) > 0
+    ]
+    if continue_watching:
+        shelves.append({
+            "id": "continue_watching",
+            "title": "▶ Continue Watching",
+            "tag": "Resume Playback",
+            "is_continue_watching": True,
+            "items": continue_watching
+        })
+
+    # 2. Because You Watched ... (ML Recommender Integration)
+    if history:
+        last_watched = history[0]
+        recs = rec.get_ml_recommendations(last_watched.get("tmdb_id"), last_watched.get("title"), limit=10)
+        if recs:
+            shelves.append({
+                "id": "because_you_watched",
+                "title": f"🤖 Because You Watched {last_watched.get('title')}",
+                "tag": "AI Recommender",
+                "items": recs
+            })
+
+    # Trending Now
+    shelves.append({"id": "trending", "title": "🔥 Trending Now on MovieRecommender", "tag": "TMDB Popular", "items": take(CATALOG, 10)})
+    
+    # Curated categories
     cartoons = [m for m in CATALOG if m.get("category") == "Animation"]
     anime = [m for m in CATALOG if m.get("category") == "Anime"]
     kdrama = [m for m in CATALOG if m.get("country") == "Korea"]
@@ -94,8 +142,7 @@ def get_shelves():
     uk = [m for m in CATALOG if m.get("country") == "UK"]
     bangla = [m for m in CATALOG if m.get("country") == "Bangladesh"]
 
-    return [
-        {"id": "trending", "title": "🔥 Trending Now on MovieRecommender", "tag": "TMDB Popular", "items": take(CATALOG, 10)},
+    shelves.extend([
         {"id": "cartoons", "title": "🧸 Cartoons & Nostalgia (Doraemon, Shin-chan, Bheem, Tom & Jerry)", "tag": "Cartoons", "items": take(cartoons, 10)},
         {"id": "anime", "title": "⚔️ Top Anime & Japanese Animation", "tag": "AniList Live", "items": take(anime, 10)},
         {"id": "kdrama", "title": "🇰🇷 Top K-Dramas & Korean Cinema", "tag": "K-Drama", "items": take(kdrama, 10)},
@@ -106,7 +153,9 @@ def get_shelves():
         {"id": "china", "title": "🇨🇳 Chinese Cinema & C-Dramas", "tag": "C-Drama", "items": take(china, 10)},
         {"id": "uk", "title": "🇬🇧 British Classics & Crime Series", "tag": "BBC & UK", "items": take(uk, 10)},
         {"id": "bangla", "title": "🇧🇩 Bangladeshi Cinema & Hits", "tag": "Bengali Cinema", "items": take(bangla, 10)}
-    ]
+    ])
+
+    return shelves
 
 @app.get("/api/search")
 def search(q: str = Query(..., min_length=1)):
@@ -258,6 +307,13 @@ def get_movie_detail(movie_id: int, type: Optional[str] = "movie", s: Optional[i
     providers = api.fetch_streaming_providers(media_type, movie_id, "IN")
     recs = rec.get_ml_recommendations(movie_id, item.get("title"), limit=12)
     
+    # Authorized Direct Stream (HLS/MP4/Cloudflare Stream) from video_catalog
+    direct_stream = db.get_video_stream(movie_id)
+    history_items = db.get_history(50)
+    user_history = next((h for h in history_items if h.get("tmdb_id") == movie_id), None)
+    resume_seconds = user_history.get("progress_seconds", 0) if user_history else 0
+    duration_seconds = user_history.get("duration_seconds", 0) if user_history else 0
+    
     return {
         "item": item,
         "media_type": media_type,
@@ -265,6 +321,9 @@ def get_movie_detail(movie_id: int, type: Optional[str] = "movie", s: Optional[i
         "episode": e,
         "genres": item.get("genres", ["Movie"]),
         "cast": cast,
+        "direct_stream": direct_stream,
+        "resume_seconds": resume_seconds,
+        "duration_seconds": duration_seconds,
         "streaming_servers": streaming_servers,
         "trailer": trailer,
         "watch_providers": providers,
@@ -275,6 +334,19 @@ def get_movie_detail(movie_id: int, type: Optional[str] = "movie", s: Optional[i
 def get_recommendations(movie_id: int, title: Optional[str] = None):
     recs = rec.get_ml_recommendations(movie_id, title, limit=12)
     return {"movie_id": movie_id, "results": recs}
+
+# Direct Streaming Catalog Endpoints (Step 3 & 4)
+@app.post("/api/streams")
+def add_custom_stream(inp: CustomStreamInput):
+    db.set_video_stream(inp.tmdb_id, inp.title, inp.playback_type, inp.playback_url, 1, inp.subtitles)
+    return {"status": "success", "message": f"Authorized stream saved for {inp.title}"}
+
+@app.get("/api/streams/{tmdb_id}")
+def get_stream(tmdb_id: int):
+    st = db.get_video_stream(tmdb_id)
+    if not st:
+        raise HTTPException(status_code=404, detail="No direct stream found for this title")
+    return st
 
 # Watchlist Endpoints
 @app.get("/api/watchlist")
@@ -291,7 +363,7 @@ def delete_watchlist(tmdb_id: int):
     db.remove_from_watchlist(tmdb_id)
     return {"status": "success", "message": "Removed from watchlist"}
 
-# Watch History Endpoints
+# Watch History & Playback Progress Endpoints (Step 6 & 8)
 @app.get("/api/history")
 def get_history():
     return db.get_history()
@@ -301,7 +373,13 @@ def add_history(item: WatchItem):
     db.add_to_history(item.dict())
     return {"status": "success", "message": "History updated"}
 
+@app.post("/api/history/{tmdb_id}/progress")
+def update_playback_progress(tmdb_id: int, update: ProgressUpdate):
+    db.update_playback_progress(tmdb_id, update.progress_seconds, update.duration_seconds)
+    return {"status": "ok", "tmdb_id": tmdb_id, "progress": update.progress_seconds}
+
 @app.delete("/api/history")
 def clear_history():
     db.clear_history()
+    return {"status": "success", "message": "History cleared"}
     return {"status": "success", "message": "History cleared"}

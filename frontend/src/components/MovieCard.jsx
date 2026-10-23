@@ -25,6 +25,11 @@ export default function MovieCard({ item }) {
         <div className={`card-rating ${ratingClass}`}>
           {rating.toFixed(1)}
         </div>
+        {item.progress_percent > 0 && (
+          <div style={{ position: "absolute", bottom: 0, left: 0, width: "100%", height: "4px", background: "rgba(255,255,255,0.2)", zIndex: 3 }}>
+            <div style={{ width: `${Math.min(item.progress_percent, 100)}%`, height: "100%", background: "#e50914" }} />
+          </div>
+        )}
       </div>
       <div className="card-body">
         <div className="card-title" title={item.title}>
@@ -32,7 +37,11 @@ export default function MovieCard({ item }) {
         </div>
         <div className="card-meta">
           <span>{item.year || "2024"}</span>
-          <span>{item.country || "Global"}</span>
+          {item.progress_percent > 0 ? (
+            <span style={{ color: "#38bdf8", fontWeight: "700" }}>Resume {Math.round(item.progress_percent)}%</span>
+          ) : (
+            <span>{item.country || "Global"}</span>
+          )}
         </div>
       </div>
     </Link>

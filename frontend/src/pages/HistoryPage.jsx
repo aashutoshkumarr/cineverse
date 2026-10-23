@@ -53,9 +53,21 @@ export default function HistoryPage() {
         </div>
       ) : (
         <div className="movie-grid">
-          {items.map((item) => (
-            <MovieCard key={item.tmdb_id || item.id} item={{ ...item, id: item.tmdb_id || item.id }} />
-          ))}
+          {items.map((item) => {
+            const progPercent = (item.progress_seconds && item.duration_seconds && item.duration_seconds > 0)
+              ? (item.progress_seconds / item.duration_seconds) * 100
+              : 0;
+            return (
+              <MovieCard
+                key={item.tmdb_id || item.id}
+                item={{
+                  ...item,
+                  id: item.tmdb_id || item.id,
+                  progress_percent: progPercent
+                }}
+              />
+            );
+          })}
         </div>
       )}
     </div>

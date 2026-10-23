@@ -652,3 +652,45 @@ body {
   border-radius: 10px;
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
+
+/* Video.js Netflix Dark Theme Customization */
+.video-js.vjs-netflix-skin {
+  font-family: inherit;
+  width: 100% !important;
+  height: 100% !important;
+  aspect-ratio: 16 / 9;
+  background-color: #000000;
+}
+
+.video-js .vjs-big-play-button {
+  background-color: rgba(249, 115, 22, 0.9) !important;
+  border: none !important;
+  border-radius: 50% !important;
+  width: 72px !important;
+  height: 72px !important;
+  line-height: 72px !important;
+  box-shadow: 0 0 30px rgba(249, 115, 22, 0.6) !important;
+  transition: transform 0.2s ease, background-color 0.2s ease !important;
+}
+
+.video-js:hover .vjs-big-play-button {
+  background-color: #f97316 !important;
+  transform: scale(1.1);
+}
+
+.video-js .vjs-control-bar {
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.95), transparent) !important;
+  height: 4em !important;
+}
+
+.video-js .vjs-play-progress {
+  background-color: #e50914 !important;
+}
+
+.video-js .vjs-slider {
+  background-color: rgba(255, 255, 255, 0.25) !important;
+}
+
+.video-js .vjs-load-progress {
+  background-color: rgba(255, 255, 255, 0.4) !important;
+}

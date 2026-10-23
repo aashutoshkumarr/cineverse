@@ -72,6 +72,22 @@ export async function addToHistory(item) {
   return res.json();
 }
 
+export async function updatePlaybackProgress(tmdbId, progressSeconds, durationSeconds) {
+  try {
+    const res = await fetch(`${API_BASE}/history/${tmdbId}/progress`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        progress_seconds: progressSeconds,
+        duration_seconds: durationSeconds
+      })
+    });
+    return res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
 export async function clearHistory() {
   const res = await fetch(`${API_BASE}/history`, { method: "DELETE" });
   return res.json();

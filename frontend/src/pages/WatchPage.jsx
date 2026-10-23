@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useSearchParams, Link } from "react-router-dom";
-import { fetchMovieDetail, addToWatchlist, addToHistory } from "../services/api";
+import { fetchMovieDetail, addToWatchlist, addToHistory, updatePlaybackProgress } from "../services/api";
 import MovieCard from "../components/MovieCard";
 import TrailerPlayer from "../components/TrailerPlayer";
-import { Play, Bookmark, Star, Tv, ArrowLeft, ChevronLeft, ChevronRight, Check } from "lucide-react";
+import VideoPlayer from "../components/VideoPlayer";
+import { Play, Bookmark, Star, Tv, ArrowLeft, ChevronLeft, ChevronRight, Check, Zap, Globe } from "lucide-react";
 
 export default function WatchPage() {
   const { id } = useParams();
@@ -13,6 +14,7 @@ export default function WatchPage() {
   const [season, setSeason] = useState(1);
   const [episode, setEpisode] = useState(1);
   const [activeServer, setActiveServer] = useState(0);
+  const [playerMode, setPlayerMode] = useState("cdn"); // "cdn" or "servers"
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [added, setAdded] = useState(false);
@@ -27,6 +29,11 @@ export default function WatchPage() {
       .then((data) => {
         setDetail(data);
         setActiveServer(0);
+        if (data.direct_stream) {
+          setPlayerMode("cdn");
+        } else {
+          setPlayerMode("servers");
+        }
 
         // Record in history automatically
         if (data.item) {
@@ -36,7 +43,9 @@ export default function WatchPage() {
             poster: data.item.poster,
             year: data.item.year,
             rating: data.item.rating,
-            media_type: mediaType
+            media_type: mediaType,
+            progress_seconds: data.resume_seconds || 0,
+            duration_seconds: data.duration_seconds || 0
           }).catch(() => {});
         }
       })
@@ -236,13 +245,58 @@ export default function WatchPage() {
         </p>
       </div>
 
-      {/* 4. Cinema Streaming Player (10 Servers) - Unfolds on "Watch Free" or when desired */}
+      {/* 4. Cinema Streaming Player (Native CDN Player or 10 Servers) */}
       {showPlayer && (
         <div ref={playerRef} style={{ marginBottom: "50px", scrollMarginTop: "90px" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
-            <h2 style={{ fontSize: "20px", fontWeight: "800", color: "#ffffff", display: "flex", alignItems: "center", gap: "8px" }}>
-              <span style={{ color: "#f97316" }}>▶</span> Full Cinema Player
-            </h2>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px", flexWrap: "wrap", gap: "10px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap" }}>
+              <h2 style={{ fontSize: "20px", fontWeight: "800", color: "#ffffff", display: "flex", alignItems: "center", gap: "8px", margin: 0 }}>
+                <span style={{ color: "#f97316" }}>▶</span> Full Cinema Player
+              </h2>
+
+              {/* Source Mode Switcher (Step 5: Managed CDN HLS vs Multi-Server) */}
+              {detail.direct_stream && (
+                <div style={{ display: "flex", gap: "6px", background: "rgba(255,255,255,0.06)", padding: "3px", borderRadius: "8px" }}>
+                  <button
+                    onClick={() => setPlayerMode("cdn")}
+                    style={{
+                      background: playerMode === "cdn" ? "#0284c7" : "transparent",
+                      color: playerMode === "cdn" ? "#ffffff" : "#94a3b8",
+                      border: "none",
+                      padding: "4px 12px",
+                      borderRadius: "6px",
+                      fontSize: "12px",
+                      fontWeight: "700",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "5px"
+                    }}
+                  >
+                    <Zap size={13} /> Native CDN (HLS)
+                  </button>
+                  <button
+                    onClick={() => setPlayerMode("servers")}
+                    style={{
+                      background: playerMode === "servers" ? "#f97316" : "transparent",
+                      color: playerMode === "servers" ? "#ffffff" : "#94a3b8",
+                      border: "none",
+                      padding: "4px 12px",
+                      borderRadius: "6px",
+                      fontSize: "12px",
+                      fontWeight: "700",
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "5px"
+                    }}
+                  >
+                    <Globe size={13} /> 10 Servers
+                  </button>
+                </div>
+              )}
+            </div>
+
             <button
               onClick={() => setShowPlayer(false)}
               style={{ background: "none", border: "none", color: "#94a3b8", fontSize: "13px", cursor: "pointer" }}
@@ -251,63 +305,90 @@ export default function WatchPage() {
             </button>
           </div>
 
-          {/* Video Player Container */}
-          <div className="player-container">
-            <div className="video-frame-wrap">
-              <iframe
-                key={`${currentEmbedUrl}-${activeServer}`}
-                src={currentEmbedUrl}
+          {/* Conditional Player View */}
+          {playerMode === "cdn" && detail.direct_stream ? (
+            <div style={{ marginBottom: "20px" }}>
+              <VideoPlayer
+                src={detail.direct_stream.playback_url}
+                type={detail.direct_stream.playback_type}
+                initialTime={detail.resume_seconds || 0}
+                poster={item.poster}
                 title={item.title}
-                className="video-frame"
-                referrerPolicy="no-referrer"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
-                allowFullScreen
+                onProgress={(curr, dur) => {
+                  updatePlaybackProgress(item.id, curr, dur);
+                }}
               />
-            </div>
 
-            {/* Clean Server Switcher Bar (Exact match with screenshot 2) */}
-            <div className="server-bar">
-              <div className="server-list" style={{ display: "flex", alignItems: "center", width: "100%", flexWrap: "wrap", gap: "8px" }}>
-                {streaming_servers.map((srv, idx) => (
-                  <button
-                    key={srv.id}
-                    className={`server-btn ${activeServer === idx ? "active" : ""}`}
-                    onClick={() => setActiveServer(idx)}
-                  >
-                    {activeServer === idx ? `📶 Server ${idx + 1}` : `Server ${idx + 1}`}
-                  </button>
-                ))}
-
-                {currentEmbedUrl && (
-                  <a
-                    href={currentEmbedUrl}
-                    target="_blank"
-                    rel="noreferrer noopener"
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "6px",
-                      background: "rgba(255,255,255,0.06)",
-                      border: "1px solid rgba(255,255,255,0.15)",
-                      color: "#94a3b8",
-                      padding: "6px 14px",
-                      borderRadius: "6px",
-                      fontSize: "12px",
-                      textDecoration: "none",
-                      fontWeight: "600",
-                      marginLeft: "auto",
-                      transition: "all 0.15s"
-                    }}
-                    onMouseEnter={(e) => { e.currentTarget.style.color = "#ffffff"; e.currentTarget.style.borderColor = "#38bdf8"; }}
-                    onMouseLeave={(e) => { e.currentTarget.style.color = "#94a3b8"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"; }}
-                    title="Open video in a new full window tab if blocked by browser or ISP"
-                  >
-                    <span>↗ Open Tab</span>
-                  </a>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", background: "#081a36", borderRadius: "8px", marginTop: "10px", fontSize: "13px", color: "#94a3b8" }}>
+                <span style={{ color: "#38bdf8", fontWeight: "600", display: "flex", alignItems: "center", gap: "6px" }}>
+                  <Zap size={14} /> High-Speed Video.js HLS Delivery Active (Adaptive 1080p · Zero Buffering)
+                </span>
+                {detail.resume_seconds > 10 && (
+                  <span style={{ color: "#00e676", fontWeight: "600" }}>
+                    🕒 Resumed from {Math.floor(detail.resume_seconds / 60)}m {Math.floor(detail.resume_seconds % 60)}s
+                  </span>
                 )}
               </div>
             </div>
-          </div>
+          ) : (
+            /* Video Player Container for 10 Embed Servers */
+            <div className="player-container">
+              <div className="video-frame-wrap">
+                <iframe
+                  key={`${currentEmbedUrl}-${activeServer}`}
+                  src={currentEmbedUrl}
+                  title={item.title}
+                  className="video-frame"
+                  referrerPolicy="no-referrer"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+                  allowFullScreen
+                />
+              </div>
+
+              {/* Clean Server Switcher Bar (Exact match with screenshot 2) */}
+              <div className="server-bar">
+                <div className="server-list" style={{ display: "flex", alignItems: "center", width: "100%", flexWrap: "wrap", gap: "8px" }}>
+                  {streaming_servers.map((srv, idx) => (
+                    <button
+                      key={srv.id}
+                      className={`server-btn ${activeServer === idx ? "active" : ""}`}
+                      onClick={() => setActiveServer(idx)}
+                    >
+                      {activeServer === idx ? `📶 Server ${idx + 1}` : `Server ${idx + 1}`}
+                    </button>
+                  ))}
+
+                  {currentEmbedUrl && (
+                    <a
+                      href={currentEmbedUrl}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "6px",
+                        background: "rgba(255,255,255,0.06)",
+                        border: "1px solid rgba(255,255,255,0.15)",
+                        color: "#94a3b8",
+                        padding: "6px 14px",
+                        borderRadius: "6px",
+                        fontSize: "12px",
+                        textDecoration: "none",
+                        fontWeight: "600",
+                        marginLeft: "auto",
+                        transition: "all 0.15s"
+                      }}
+                      onMouseEnter={(e) => { e.currentTarget.style.color = "#ffffff"; e.currentTarget.style.borderColor = "#38bdf8"; }}
+                      onMouseLeave={(e) => { e.currentTarget.style.color = "#94a3b8"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)"; }}
+                      title="Open video in a new full window tab if blocked by browser or ISP"
+                    >
+                      <span>↗ Open Tab</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* TV Series Controls */}
           {mediaType === "tv" && (
