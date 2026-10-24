@@ -65,9 +65,27 @@ export default function Navbar() {
     <header className="navbar">
       <div className="container nav-content">
         {/* Brand Logo */}
-        <Link to="/" className="logo-text">
-          <Film size={26} color="#00e676" />
-          <span>Movie<span className="logo-highlight">Recommender</span></span>
+        <Link to="/" className="logo-text" style={{ display: "flex", alignItems: "center", gap: "10px", textDecoration: "none" }}>
+          <img
+            src="/cineverse-card.png"
+            alt="Cineverse"
+            style={{
+              width: "38px",
+              height: "38px",
+              borderRadius: "10px",
+              boxShadow: "0 0 18px rgba(217, 70, 239, 0.45)",
+              border: "1px solid rgba(255, 255, 255, 0.18)",
+              objectFit: "cover"
+            }}
+          />
+          <div style={{ display: "flex", flexDirection: "column", lineHeight: 1 }}>
+            <span style={{ fontSize: "22px", fontWeight: "900", letterSpacing: "-0.5px" }}>
+              Cine<span style={{ background: "linear-gradient(135deg, #ec4899 0%, #a855f7 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>verse</span>
+            </span>
+            <span style={{ fontSize: "9px", fontWeight: "700", color: "#94a3b8", letterSpacing: "0.6px", marginTop: "4px" }}>
+              YOUR UNIVERSE OF ENTERTAINMENT
+            </span>
+          </div>
         </Link>
 
         {/* Global Instant Search */}

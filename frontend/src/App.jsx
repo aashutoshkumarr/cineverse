@@ -39,11 +39,12 @@ export default function App() {
 
         <footer style={{ background: "#020916", borderTop: "1px solid rgba(255,255,255,0.06)", padding: "30px 0", textAlign: "center", color: "#64748b", fontSize: "13px" }}>
           <div className="container">
-            <p style={{ color: "#94a3b8", fontWeight: "600", marginBottom: "6px" }}>
-              🎬 MovieRecommender — Full-Stack Cinema Streaming & AI Recommendation Platform
+            <p style={{ color: "#ffffff", fontWeight: "800", marginBottom: "6px", fontSize: "15px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+              <img src="/cineverse-card.png" alt="Cineverse" style={{ width: "20px", height: "20px", borderRadius: "5px" }} />
+              <span>Cineverse — Your Universe of Entertainment</span>
             </p>
             <p>
-              Powered by FastAPI Backend, React 19 Frontend, TMDB Catalog, ML Cosine Similarity, and Multi-Server Streaming.
+              Next-Gen Cinema Streaming & AI Recommendation Platform • High-Speed CDN Playback • Multi-Server Redundancy
             </p>
           </div>
         </footer>

@@ -15,7 +15,7 @@ from backend import database as db
 from backend import recommender as rec
 from backend import streaming_service as stream
 
-app = FastAPI(title="MovieRecommender API", version="2.0.0")
+app = FastAPI(title="Cineverse API", version="2.0.0")
 
 # Enable CORS for React frontend (Vite defaults to port 5173 or any port)
 app.add_middleware(
@@ -128,7 +128,7 @@ def get_shelves():
             })
 
     # Trending Now
-    shelves.append({"id": "trending", "title": "🔥 Trending Now on MovieRecommender", "tag": "TMDB Popular", "items": take(CATALOG, 10)})
+    shelves.append({"id": "trending", "title": "🔥 Trending Now on Cineverse", "tag": "TMDB Popular", "items": take(CATALOG, 10)})
     
     # Curated categories
     cartoons = [m for m in CATALOG if m.get("category") == "Animation"]
