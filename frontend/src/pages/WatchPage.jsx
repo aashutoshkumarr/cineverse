@@ -14,7 +14,7 @@ export default function WatchPage() {
   const [season, setSeason] = useState(1);
   const [episode, setEpisode] = useState(1);
   const [activeServer, setActiveServer] = useState(0);
-  const [playerMode, setPlayerMode] = useState("cdn"); // "cdn" or "servers"
+  const [playerMode, setPlayerMode] = useState("servers"); // Default to 10 Servers
   const [detail, setDetail] = useState(null);
   const [loading, setLoading] = useState(true);
   const [added, setAdded] = useState(false);
@@ -29,11 +29,7 @@ export default function WatchPage() {
       .then((data) => {
         setDetail(data);
         setActiveServer(0);
-        if (data.direct_stream) {
-          setPlayerMode("cdn");
-        } else {
-          setPlayerMode("servers");
-        }
+        setPlayerMode("servers");
 
         // Record in history automatically
         if (data.item) {

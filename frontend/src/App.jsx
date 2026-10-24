@@ -1,6 +1,7 @@
 import React, { useEffect } from "react";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import ErrorBoundary from "./components/ErrorBoundary";
 import HomePage from "./pages/HomePage";
 import WatchPage from "./pages/WatchPage";
 import WatchlistPage from "./pages/WatchlistPage";
@@ -24,14 +25,16 @@ export default function App() {
         <Navbar />
         
         <main style={{ flex: 1 }}>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/watch/:id" element={<WatchPage />} />
-            <Route path="/movie/:id" element={<WatchPage />} />
-            <Route path="/tv/:id" element={<WatchPage />} />
-            <Route path="/watchlist" element={<WatchlistPage />} />
-            <Route path="/history" element={<HistoryPage />} />
-          </Routes>
+          <ErrorBoundary>
+            <Routes>
+              <Route path="/" element={<HomePage />} />
+              <Route path="/watch/:id" element={<WatchPage />} />
+              <Route path="/movie/:id" element={<WatchPage />} />
+              <Route path="/tv/:id" element={<WatchPage />} />
+              <Route path="/watchlist" element={<WatchlistPage />} />
+              <Route path="/history" element={<HistoryPage />} />
+            </Routes>
+          </ErrorBoundary>
         </main>
 
         <footer style={{ background: "#020916", borderTop: "1px solid rgba(255,255,255,0.06)", padding: "30px 0", textAlign: "center", color: "#64748b", fontSize: "13px" }}>
