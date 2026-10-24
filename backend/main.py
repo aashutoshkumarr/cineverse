@@ -302,7 +302,9 @@ def get_movie_detail(movie_id: int, type: Optional[str] = "movie", s: Optional[i
         item["release_date"] = format_release_date(item.get("year", "2024") + "-01-01")
         
     cast = ext.get("cast", []) if ext else []
-    trailer = ext.get("trailer") if ext else stream.get_trailer_url(movie_id, media_type)
+    trailer = stream.get_trailer_url(movie_id, media_type, title=item.get("title"))
+    if not trailer and ext:
+        trailer = ext.get("trailer")
     streaming_servers = stream.get_streaming_servers(movie_id, media_type, season=s, episode=e)
     providers = api.fetch_streaming_providers(media_type, movie_id, "IN")
     recs = rec.get_ml_recommendations(movie_id, item.get("title"), limit=12)
