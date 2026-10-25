@@ -1,5 +1,4 @@
 import os
-import socket
 import requests
 import json
 import urllib.parse
@@ -8,27 +7,6 @@ from dotenv import load_dotenv
 
 # Load environment variables from .env file
 load_dotenv()
-
-# -----------------------------
-# Dynamic CloudFront IP DNS Patch
-# -----------------------------
-CLOUDFRONT_IPS = ['65.9.130.126', '13.226.79.49', '18.154.227.106', '108.156.60.106', '143.204.143.123', '3.175.86.67']
-_active_ip = CLOUDFRONT_IPS[0]
-for ip in CLOUDFRONT_IPS:
-    try:
-        s = socket.create_connection((ip, 443), timeout=1.0)
-        s.close()
-        _active_ip = ip
-        break
-    except Exception:
-        pass
-
-_real_getaddrinfo = socket.getaddrinfo
-def patched_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
-    if host == 'api.themoviedb.org':
-        return _real_getaddrinfo(_active_ip, port, family, type, proto, flags)
-    return _real_getaddrinfo(host, port, family, type, proto, flags)
-socket.getaddrinfo = patched_getaddrinfo
 
 TMDB_API_KEY = os.getenv("TMDB_API_KEY", "")
 TMDB_BASE_URL = "https://api.themoviedb.org/3"
