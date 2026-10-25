@@ -38,10 +38,6 @@
       </td>
     </tr>
   </table>
-
-  <br/>
-  <h3>⚡ End-to-End System Workflow & Component Architecture</h3>
-  <img src="docs/diagrams/cineverse-architecture.svg" alt="Cineverse Workflow & Architecture Diagram" width="100%" style="border-radius: 14px; border: 1px solid rgba(255,255,255,0.18); box-shadow: 0 12px 35px rgba(0,0,0,0.7);" />
 </div>
 
 ---
