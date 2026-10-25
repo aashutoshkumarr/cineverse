@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Core Brand Planet Gradient (Vibrant Pink to Purple) -->
+    <linearGradient id="brandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f43f5e" />
+      <stop offset="35%" stop-color="#ec4899" />
+      <stop offset="70%" stop-color="#d946ef" />
+      <stop offset="100%" stop-color="#8b5cf6" />
+    </linearGradient>
+
+    <!-- Ring Gradient with Depth -->
+    <linearGradient id="ringGrad" x1="0%" y1="50%" x2="100%" y2="50%">
+      <stop offset="0%" stop-color="#a855f7" />
+      <stop offset="30%" stop-color="#ec4899" />
+      <stop offset="70%" stop-color="#f43f5e" />
+      <stop offset="100%" stop-color="#ec4899" />
+    </linearGradient>
+
+    <!-- Clip for Behind Ring -->
+    <clipPath id="cutBehind">
+      <rect x="0" y="0" width="512" height="260" />
+    </clipPath>
+  </defs>
+
+  <!-- BACK PORTION OF THE PLANETARY RING -->
+  <g transform="translate(256, 256) rotate(-22)" clip-path="url(#cutBehind)">
+    <path d="M -195,0 A 195 44 0 0 1 195,0" fill="none" stroke="url(#ringGrad)" stroke-width="26" stroke-linecap="round" />
+  </g>
+
+  <!-- MAIN PLANET 'C' BODY -->
+  <path d="
+    M 315, 175
+    A 115 115 0 1 0 315, 337
+    L 278, 303
+    A 65 65 0 1 1 278, 209
+    Z
+  " fill="url(#brandGrad)" />
+
+  <!-- INNER MOONS / BUBBLE SPHERES IN THE C CAVITY -->
+  <circle cx="272" cy="202" r="13" fill="url(#brandGrad)" />
+  <circle cx="289" cy="214" r="7.5" fill="url(#brandGrad)" />
+  <circle cx="275" cy="226" r="5" fill="url(#brandGrad)" />
+
+  <!-- FRONT PORTION OF THE PLANETARY RING -->
+  <g transform="translate(256, 256) rotate(-22)">
+    <path d="M -195,0 A 195 44 0 0 0 195,0" fill="none" stroke="url(#ringGrad)" stroke-width="26" stroke-linecap="round" />
+    <path d="M -130,28 A 195 44 0 0 0 130,28" fill="none" stroke="#ffffff" stroke-width="3" stroke-linecap="round" opacity="0.4" />
+  </g>
+</svg>
