@@ -56,6 +56,16 @@ class CustomStreamInput(BaseModel):
     playback_url: str
     subtitles: Optional[str] = None
 
+@app.get("/")
+def root():
+    return {
+        "app": "Cineverse API",
+        "status": "running",
+        "frontend_url": "http://localhost:3001",
+        "docs_url": "http://127.0.0.1:8000/docs",
+        "catalog_size": len(CATALOG)
+    }
+
 @app.get("/api/health")
 def health():
     return {"status": "ok", "total_catalog": len(CATALOG)}
@@ -127,13 +137,24 @@ def get_shelves():
                 "items": recs
             })
 
+    # Curate high-impact trending blockbusters for Trending Now
+    priority_ids = [385687, 200709, 132117, 19995, 157336, 27205, 99966, 550, 507941, 320873] # Fast X, Weak Hero, Farzi, Avatar, Interstellar, Inception, All of Us Are Dead, Fight Club, Section 375, Dhanak
+    priority_items = [m for pid in priority_ids for m in CATALOG if m.get("id") == pid]
+    other_items = [m for m in CATALOG if m.get("id") not in priority_ids and float(m.get("rating", 0)) >= 7.8]
+    trending_items = (priority_items + other_items)[:12]
+
     # Trending Now
-    shelves.append({"id": "trending", "title": "🔥 Trending Now on Cineverse", "tag": "TMDB Popular", "items": take(CATALOG, 10)})
+    shelves.append({"id": "trending", "title": "🔥 Trending Now on Cineverse", "tag": "Popular Blockbusters", "items": trending_items})
     
     # Curated categories
     cartoons = [m for m in CATALOG if m.get("category") == "Animation"]
     anime = [m for m in CATALOG if m.get("category") == "Anime"]
-    kdrama = [m for m in CATALOG if m.get("country") == "Korea"]
+    
+    kdrama_priority = [93405, 200709, 99966, 117376, 127529, 215072, 96648, 113268, 233347]
+    kdrama_favs = [m for kid in kdrama_priority for m in CATALOG if m.get("id") == kid]
+    kdrama_others = [m for m in CATALOG if m.get("country") == "Korea" and m.get("id") not in kdrama_priority and "reality" not in [g.lower() for g in m.get("genres", [])] and m.get("title") != "Infinite Challenge"]
+    kdrama = kdrama_favs + kdrama_others
+
     hindi = [m for m in CATALOG if m.get("country") == "India" and m.get("category") == "Hindi"]
     south = [m for m in CATALOG if m.get("country") == "India" and m.get("category") in ["Telugu", "Tamil", "Malayalam"]]
     hollywood = [m for m in CATALOG if m.get("country") == "USA" and m.get("category") == "Hollywood"]
@@ -195,6 +216,90 @@ def format_release_date(date_str):
     except Exception:
         return date_str
 
+import urllib.parse
+
+_KNOWN_SEASONS = {
+    # Korean Mega-Hits
+    93405: [{"season": 1, "episodes": 9, "name": "Season 1"}, {"season": 2, "episodes": 6, "name": "Season 2"}], # Squid Game
+    200709: [{"season": 1, "episodes": 8, "name": "Season 1"}, {"season": 2, "episodes": 8, "name": "Season 2"}], # Weak Hero Class 1
+    200710: [{"season": 1, "episodes": 8, "name": "Season 1"}], # Weak Hero [English Dub]
+    200711: [{"season": 1, "episodes": 8, "name": "Season 1"}], # Weak Hero Class 1 [Korea]
+    99966: [{"season": 1, "episodes": 12, "name": "Season 1"}], # All of Us Are Dead
+    117376: [{"season": 1, "episodes": 20, "name": "Season 1"}], # Vincenzo
+    127529: [{"season": 1, "episodes": 8, "name": "Season 1"}], # Bloodhounds
+    215072: [{"season": 1, "episodes": 8, "name": "Season 1"}], # A Shop for Killers
+    96648: [{"season": 1, "episodes": 10, "name": "Season 1"}, {"season": 2, "episodes": 8, "name": "Season 2"}, {"season": 3, "episodes": 8, "name": "Season 3"}], # Sweet Home
+    113268: [{"season": 1, "episodes": 16, "name": "Season 1"}, {"season": 2, "episodes": 12, "name": "Season 2"}], # The Uncanny Counter
+    233347: [{"season": 1, "episodes": 10, "name": "Season 1"}], # Study Group
+    216390: [{"season": 1, "episodes": 8, "name": "Season 1"}], # Death's Game
+    213713: [{"season": 1, "episodes": 16, "name": "Season 1"}], # My Demon
+    94796: [{"season": 1, "episodes": 16, "name": "Season 1"}], # Crash Landing on You
+    136283: [{"season": 1, "episodes": 16, "name": "Season 1"}], # The Glory
+    5092: [{"season": 1, "episodes": 24, "name": "Season 1"}, {"season": 2, "episodes": 24, "name": "Season 2"}, {"season": 3, "episodes": 24, "name": "Season 3"}], # Infinite Challenge
+
+    # Indian Mega-Hits
+    132117: [{"season": 1, "episodes": 8, "name": "Season 1"}], # Farzi
+    86847: [{"season": 1, "episodes": 9, "name": "Season 1"}, {"season": 2, "episodes": 10, "name": "Season 2"}, {"season": 3, "episodes": 10, "name": "Season 3"}], # Mirzapur
+    100757: [{"season": 1, "episodes": 8, "name": "Season 1"}, {"season": 2, "episodes": 8, "name": "Season 2"}, {"season": 3, "episodes": 8, "name": "Season 3"}], # Panchayat
+    93425: [{"season": 1, "episodes": 10, "name": "Season 1"}, {"season": 2, "episodes": 9, "name": "Season 2"}], # The Family Man
+    79244: [{"season": 1, "episodes": 8, "name": "Season 1"}, {"season": 2, "episodes": 8, "name": "Season 2"}], # Sacred Games
+    100128: [{"season": 1, "episodes": 8, "name": "Season 1"}, {"season": 2, "episodes": 8, "name": "Season 2"}], # Asur
+    110912: [{"season": 1, "episodes": 10, "name": "Season 1"}], # Scam 1992
+    102714: [{"season": 1, "episodes": 9, "name": "Season 1"}], # Paatal Lok
+
+    # Hollywood Mega-Hits
+    66732: [{"season": 1, "episodes": 8, "name": "Season 1"}, {"season": 2, "episodes": 9, "name": "Season 2"}, {"season": 3, "episodes": 8, "name": "Season 3"}, {"season": 4, "episodes": 9, "name": "Season 4"}], # Stranger Things
+    76479: [{"season": 1, "episodes": 8, "name": "Season 1"}, {"season": 2, "episodes": 8, "name": "Season 2"}, {"season": 3, "episodes": 8, "name": "Season 3"}, {"season": 4, "episodes": 8, "name": "Season 4"}], # The Boys
+    119051: [{"season": 1, "episodes": 8, "name": "Season 1"}], # Wednesday
+    71446: [{"season": 1, "episodes": 13, "name": "Part 1"}, {"season": 2, "episodes": 9, "name": "Part 2"}, {"season": 3, "episodes": 8, "name": "Part 3"}, {"season": 4, "episodes": 8, "name": "Part 4"}, {"season": 5, "episodes": 10, "name": "Part 5"}], # Money Heist
+    100088: [{"season": 1, "episodes": 9, "name": "Season 1"}], # The Last of Us
+    84958: [{"season": 1, "episodes": 6, "name": "Season 1"}, {"season": 2, "episodes": 6, "name": "Season 2"}], # Loki
+    1396: [{"season": 1, "episodes": 7, "name": "Season 1"}, {"season": 2, "episodes": 13, "name": "Season 2"}, {"season": 3, "episodes": 13, "name": "Season 3"}, {"season": 4, "episodes": 13, "name": "Season 4"}, {"season": 5, "episodes": 16, "name": "Season 5"}], # Breaking Bad
+    1399: [{"season": 1, "episodes": 10, "name": "Season 1"}, {"season": 2, "episodes": 10, "name": "Season 2"}, {"season": 3, "episodes": 10, "name": "Season 3"}, {"season": 4, "episodes": 10, "name": "Season 4"}, {"season": 5, "episodes": 10, "name": "Season 5"}, {"season": 6, "episodes": 10, "name": "Season 6"}, {"season": 7, "episodes": 7, "name": "Season 7"}, {"season": 8, "episodes": 6, "name": "Season 8"}], # Game of Thrones
+}
+
+def get_real_seasons_data(title, media_type="tv", tmdb_id=None):
+    if media_type == "movie":
+        return []
+    
+    if tmdb_id and tmdb_id in _KNOWN_SEASONS:
+        return _KNOWN_SEASONS[tmdb_id]
+
+    seasons = []
+    if title:
+        t_low = title.lower().strip()
+        for kid, kseasons in _KNOWN_SEASONS.items():
+            k_item = next((m for m in CATALOG if m.get("id") == kid), None)
+            if k_item and k_item.get("title", "").lower().strip() in t_low:
+                return kseasons
+
+        try:
+            q = urllib.parse.quote_plus(title.strip())
+            r = requests.get(f"https://api2.imdb4.shop/api/search2/{q}?page=0", headers=headers_tmdb, timeout=0.6)
+            if r.status_code == 200:
+                res = r.json().get("results", [])
+                if res:
+                    m_type = res[0].get("media_type", "tv")
+                    m_id = res[0].get("id")
+                    r2 = requests.get(f"https://api2.imdb4.shop/api/{m_type}/{m_id}", headers=headers_tmdb, timeout=0.6)
+                    if r2.status_code == 200:
+                        det = r2.json().get("results", [{}])[0]
+                        for s in det.get("season", []):
+                            se_num = s.get("se", 1)
+                            ep_num = s.get("ep") or 8
+                            if se_num > 0:
+                                seasons.append({
+                                    "season": se_num,
+                                    "episodes": ep_num,
+                                    "name": f"Season {se_num}"
+                                })
+        except Exception:
+            pass
+
+    if not seasons and media_type != "movie":
+        seasons = [{"season": 1, "episodes": 8, "name": "Season 1"}]
+    return seasons
+
 def fetch_tmdb_extended(movie_id, media_type="movie"):
     cache_key = f"{media_type}_{movie_id}"
     if cache_key in _extended_cache:
@@ -208,7 +313,7 @@ def fetch_tmdb_extended(movie_id, media_type="movie"):
                 "api_key": api.TMDB_API_KEY,
                 "append_to_response": "aggregate_credits,credits,videos"
             }
-            res = requests.get(url, params=params, headers=headers_tmdb, timeout=4.5)
+            res = requests.get(url, params=params, headers=headers_tmdb, timeout=0.6)
             if res.status_code == 200:
                 data = res.json()
                 cast_list = []
@@ -249,6 +354,24 @@ def fetch_tmdb_extended(movie_id, media_type="movie"):
                         if v.get("type") == "Trailer":
                             break
 
+                seasons_from_tmdb = []
+                if m_type == "tv":
+                    for s_item in data.get("seasons", []):
+                        s_num = s_item.get("season_number", 0)
+                        ep_c = s_item.get("episode_count", 0)
+                        if s_num > 0 and ep_c > 0:
+                            p_path = s_item.get("poster_path")
+                            seasons_from_tmdb.append({
+                                "season": s_num,
+                                "episodes": ep_c,
+                                "name": s_item.get("name") or f"Season {s_num}",
+                                "poster": f"https://image.tmdb.org/t/p/w500{p_path}" if p_path else None,
+                                "overview": s_item.get("overview", "")
+                            })
+
+                b_path = data.get("backdrop_path")
+                backdrop_url = f"https://image.tmdb.org/t/p/w1280{b_path}" if b_path else None
+
                 res_data = {
                     "title": data.get("title") or data.get("name"),
                     "overview": data.get("overview"),
@@ -258,7 +381,9 @@ def fetch_tmdb_extended(movie_id, media_type="movie"):
                     "cast": cast_list,
                     "country": country_name,
                     "trailer": trailer_obj,
-                    "detected_type": m_type
+                    "detected_type": m_type,
+                    "seasons": seasons_from_tmdb,
+                    "backdrop": backdrop_url
                 }
                 _extended_cache[cache_key] = res_data
                 return res_data
@@ -266,13 +391,61 @@ def fetch_tmdb_extended(movie_id, media_type="movie"):
             print("Extended details error:", e)
     return None
 
+def fetch_season_episodes(tv_id: int, season_num: int):
+    cache_k = f"season_eps_{tv_id}_{season_num}"
+    if cache_k in _extended_cache:
+        return _extended_cache[cache_k]
+    try:
+        url = f"{api.TMDB_BASE_URL}/tv/{tv_id}/season/{season_num}"
+        res = requests.get(url, params={"api_key": api.TMDB_API_KEY}, headers=headers_tmdb, timeout=0.6)
+        if res.status_code == 200:
+            s_data = res.json()
+            p_path = s_data.get("poster_path")
+            poster_url = f"https://image.tmdb.org/t/p/w500{p_path}" if p_path else None
+            ep_list = []
+            for ep in s_data.get("episodes", []):
+                st = ep.get("still_path")
+                ep_list.append({
+                    "episode_number": ep.get("episode_number"),
+                    "name": ep.get("name") or f"Episode {ep.get('episode_number')}",
+                    "still": f"https://image.tmdb.org/t/p/w780{st}" if st else None,
+                    "overview": ep.get("overview", "")
+                })
+            res_obj = {
+                "season_name": s_data.get("name"),
+                "poster": poster_url,
+                "overview": s_data.get("overview", ""),
+                "episodes": ep_list
+            }
+            _extended_cache[cache_k] = res_obj
+            return res_obj
+    except Exception as e:
+        print("Season episodes error:", e)
+    return None
+
 @app.get("/api/movie/{movie_id}")
-def get_movie_detail(movie_id: int, type: Optional[str] = "movie", s: Optional[int] = 1, e: Optional[int] = 1):
+def get_movie_detail(movie_id: int, type: Optional[str] = None, s: Optional[int] = 1, e: Optional[int] = 1):
     # Find in local catalog
     item = next((m for m in CATALOG if m.get("id") == movie_id), None)
-    media_type = type or (item.get("media_type") if item else "movie")
     
-    # Try fetching extended TMDB info (cast, trailer, accurate genres, release date)
+    # Source of truth for media_type:
+    # 1. If catalog item exists and specifies media_type (e.g. tv), respect it!
+    # 2. If explicit query parameter type is "tv" or "series", use tv
+    # 3. If tmdb_id is in _KNOWN_SEASONS, it is a TV show
+    if item and item.get("media_type") in ["tv", "series"]:
+        media_type = "tv"
+    elif movie_id in _KNOWN_SEASONS:
+        media_type = "tv"
+    elif type and type in ["tv", "series"]:
+        media_type = "tv"
+    elif item and item.get("media_type"):
+        media_type = item.get("media_type")
+    elif type and type == "movie":
+        media_type = "movie"
+    else:
+        media_type = "movie"
+    
+    # Try fetching extended TMDB info (cast, trailer, accurate genres, release date, seasons)
     ext = fetch_tmdb_extended(movie_id, media_type)
     if ext and ext.get("detected_type"):
         media_type = ext["detected_type"]
@@ -302,25 +475,75 @@ def get_movie_detail(movie_id: int, type: Optional[str] = "movie", s: Optional[i
         item["release_date"] = format_release_date(item.get("year", "2024") + "-01-01")
         
     cast = ext.get("cast", []) if ext else []
-    trailer = stream.get_trailer_url(movie_id, media_type, title=item.get("title"))
-    if not trailer and ext:
-        trailer = ext.get("trailer")
-    streaming_servers = stream.get_streaming_servers(movie_id, media_type, season=s, episode=e)
+    trailer = ext.get("trailer") if ext and ext.get("trailer") else stream.get_trailer_url(movie_id, media_type, title=item.get("title"))
+    # Authorized Direct Stream (Video.js, HLS/MP4/Cloudflare Stream, Internet Archive)
+    real_tmdb_id = item.get("tmdb_id") or movie_id if item else movie_id
+    direct_stream = db.get_video_stream(real_tmdb_id) or stream.get_direct_stream(real_tmdb_id, item.get("title"))
+    streaming_servers = stream.get_streaming_servers(real_tmdb_id, media_type, season=s, episode=e, direct_url=direct_stream.get("playback_url") if direct_stream else None)
     providers = api.fetch_streaming_providers(media_type, movie_id, "IN")
     recs = rec.get_ml_recommendations(movie_id, item.get("title"), limit=12)
-    
-    # Authorized Direct Stream (HLS/MP4/Cloudflare Stream) from video_catalog
-    direct_stream = db.get_video_stream(movie_id)
     history_items = db.get_history(50)
     user_history = next((h for h in history_items if h.get("tmdb_id") == movie_id), None)
     resume_seconds = user_history.get("progress_seconds", 0) if user_history else 0
     duration_seconds = user_history.get("duration_seconds", 0) if user_history else 0
+
+    # Real seasons and episodes (NetMirror / TMDB Grounded)
+    seasons = ext.get("seasons", []) if ext else []
+    if media_type != "movie" and not seasons:
+        seasons = get_real_seasons_data(item.get("title"), media_type, tmdb_id=movie_id)
+    elif media_type == "movie":
+        seasons = []
+
+    if ext and ext.get("backdrop"):
+        item["backdrop"] = ext["backdrop"]
+
+    # Fetch active season and episode thumbnails dynamically
+    active_season_info = None
+    episodes_info = []
+    current_thumbnail = item.get("backdrop") or item.get("poster")
+    if media_type != "movie":
+        active_season_info = fetch_season_episodes(movie_id, s or 1)
+        if active_season_info:
+            episodes_info = active_season_info.get("episodes", [])
+            s_poster = active_season_info.get("poster")
+            if s_poster:
+                item["poster"] = s_poster
+                item["season_poster"] = s_poster
+            # Find current episode still
+            matching_ep = next((ep for ep in episodes_info if ep.get("episode_number") == (e or 1)), None)
+            if matching_ep and matching_ep.get("still"):
+                current_thumbnail = matching_ep["still"]
+            elif s_poster:
+                current_thumbnail = s_poster
+        elif seasons:
+            match_s = next((sec for sec in seasons if sec.get("season") == (s or 1)), None)
+            if match_s and match_s.get("poster"):
+                item["poster"] = match_s["poster"]
+                item["season_poster"] = match_s["poster"]
+                current_thumbnail = match_s["poster"]
+
+        if not episodes_info and seasons:
+            match_s = next((sec for sec in seasons if sec.get("season") == (s or 1)), seasons[0])
+            total_eps = match_s.get("episodes", 8)
+            episodes_info = [
+                {
+                    "episode_number": ep_num,
+                    "name": f"Episode {ep_num}",
+                    "still": current_thumbnail,
+                    "overview": f"Episode {ep_num} of Season {s or 1}"
+                }
+                for ep_num in range(1, total_eps + 1)
+            ]
     
     return {
         "item": item,
         "media_type": media_type,
         "season": s,
         "episode": e,
+        "seasons": seasons,
+        "active_season_info": active_season_info,
+        "episodes_info": episodes_info,
+        "current_thumbnail": current_thumbnail,
         "genres": item.get("genres", ["Movie"]),
         "cast": cast,
         "direct_stream": direct_stream,

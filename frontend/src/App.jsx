@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import ErrorBoundary from "./components/ErrorBoundary";
 import HomePage from "./pages/HomePage";
+import SearchPage from "./pages/SearchPage";
 import WatchPage from "./pages/WatchPage";
 import WatchlistPage from "./pages/WatchlistPage";
 import HistoryPage from "./pages/HistoryPage";
@@ -28,6 +29,7 @@ export default function App() {
           <ErrorBoundary>
             <Routes>
               <Route path="/" element={<HomePage />} />
+              <Route path="/search" element={<SearchPage />} />
               <Route path="/watch/:id" element={<WatchPage />} />
               <Route path="/movie/:id" element={<WatchPage />} />
               <Route path="/tv/:id" element={<WatchPage />} />

@@ -27,8 +27,9 @@ export async function searchMovies(q) {
   return res.json();
 }
 
-export async function fetchMovieDetail(id, type = "movie", s = 1, e = 1) {
-  const res = await fetch(`${API_BASE}/movie/${id}?type=${type}&s=${s}&e=${e}`);
+export async function fetchMovieDetail(id, type = "", s = 1, e = 1) {
+  const typeQuery = (type && type !== "null" && type !== "undefined") ? `&type=${type}` : "";
+  const res = await fetch(`${API_BASE}/movie/${id}?s=${s}&e=${e}${typeQuery}`);
   return res.json();
 }
 

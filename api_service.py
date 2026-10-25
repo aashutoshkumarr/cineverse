@@ -7,11 +7,11 @@ from concurrent.futures import ThreadPoolExecutor
 # -----------------------------
 # Dynamic CloudFront IP DNS Patch
 # -----------------------------
-CLOUDFRONT_IPS = ['3.175.86.67', '3.175.86.103', '3.175.86.37', '3.175.86.50', '65.9.130.126']
+CLOUDFRONT_IPS = ['65.9.130.126', '13.226.79.49', '18.154.227.106', '108.156.60.106', '143.204.143.123', '3.175.86.67']
 _active_ip = CLOUDFRONT_IPS[0]
 for ip in CLOUDFRONT_IPS:
     try:
-        s = socket.create_connection((ip, 443), timeout=1.2)
+        s = socket.create_connection((ip, 443), timeout=1.0)
         s.close()
         _active_ip = ip
         break

@@ -11,14 +11,16 @@ export default function Navbar() {
   const [watchlistCount, setWatchlistCount] = useState(0);
   const [historyCount, setHistoryCount] = useState(0);
   const searchRef = useRef(null);
+  const inputRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Load counts
+  // Load counts & close dropdown on route change
   useEffect(() => {
     fetchWatchlist().then(data => setWatchlistCount(data.length)).catch(() => {});
     fetchHistory().then(data => setHistoryCount(data.length)).catch(() => {});
-  }, [location.pathname]);
+    setShowDropdown(false);
+  }, [location.pathname, location.search]);
 
   // Debounced search
   useEffect(() => {
@@ -33,7 +35,10 @@ export default function Navbar() {
       try {
         const data = await searchMovies(query);
         setResults(data.results || []);
-        setShowDropdown(true);
+        // Only show dropdown if input is currently focused AND not on /search page
+        if (document.activeElement === inputRef.current && location.pathname !== "/search") {
+          setShowDropdown(true);
+        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -42,7 +47,7 @@ export default function Navbar() {
     }, 280);
 
     return () => clearTimeout(timer);
-  }, [query]);
+  }, [query, location.pathname]);
 
   // Click outside listener
   useEffect(() => {
@@ -58,7 +63,16 @@ export default function Navbar() {
   const handleSelect = (item) => {
     setShowDropdown(false);
     setQuery("");
+    inputRef.current?.blur();
     navigate(`/watch/${item.id}?type=${item.media_type || 'movie'}`);
+  };
+
+  const handleSubmit = (e) => {
+    e?.preventDefault();
+    if (!query.trim()) return;
+    setShowDropdown(false);
+    inputRef.current?.blur();
+    navigate(`/search?q=${encodeURIComponent(query.trim())}`);
   };
 
   return (
@@ -90,23 +104,33 @@ export default function Navbar() {
 
         {/* Global Instant Search */}
         <div className="search-box" ref={searchRef}>
-          <Search size={18} className="search-icon" />
-          <input
-            type="text"
-            className="search-input"
-            placeholder="Search 2,490+ movies, cartoons, anime or K-dramas..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onFocus={() => query.trim() && setShowDropdown(true)}
-          />
-          {query && (
-            <button
-              onClick={() => { setQuery(""); setShowDropdown(false); }}
-              style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: "#94a3b8", cursor: "pointer" }}
-            >
-              <X size={16} />
+          <form className="search-form" onSubmit={handleSubmit}>
+            <input
+              ref={inputRef}
+              type="text"
+              className="search-input"
+              placeholder="Search for movie or TV show.."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => query.trim() && location.pathname !== "/search" && setShowDropdown(true)}
+              onKeyDown={(e) => {
+                if (e.key === "Escape") setShowDropdown(false);
+              }}
+            />
+            {query && (
+              <button
+                type="button"
+                onClick={() => { setQuery(""); setShowDropdown(false); }}
+                className="search-clear-btn"
+                aria-label="Clear search"
+              >
+                <X size={16} />
+              </button>
+            )}
+            <button type="submit" className="search-submit-btn">
+              Search
             </button>
-          )}
+          </form>
 
           {/* Search Dropdown Popup */}
           {showDropdown && results.length > 0 && (
@@ -132,6 +156,13 @@ export default function Navbar() {
                   </div>
                 </div>
               ))}
+              <div
+                className="search-item"
+                style={{ borderTop: "1px solid rgba(255, 255, 255, 0.1)", justifyContent: "center", color: "#38bdf8", fontWeight: "700", fontSize: "13px", marginTop: "4px", padding: "10px" }}
+                onClick={handleSubmit}
+              >
+                <span>⊞ View all "{query}" results in Grid View →</span>
+              </div>
             </div>
           )}
         </div>

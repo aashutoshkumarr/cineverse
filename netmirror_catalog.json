@@ -14316,13 +14316,13 @@
   },
   {
     "id": 200709,
-    "title": "Weak Hero",
-    "clean_title": "Weak Hero",
+    "title": "Weak Hero Class 1 [Hindi]",
+    "clean_title": "Weak Hero Class 1",
     "media_type": "tv",
     "poster": "https://image.tmdb.org/t/p/w500/hS9VVF5ffTVWNoC9B48QNsZFGy9.jpg",
-    "rating": 8.7,
-    "year": "2022",
-    "badge": "Top Rated",
+    "rating": 8.5,
+    "year": "2025",
+    "badge": "Hindi S1-S2",
     "country": "Korea",
     "category": "K-Drama",
     "language": "Korean",
@@ -54507,5 +54507,179 @@
       "Family"
     ],
     "overview": "On a golden afternoon, wildly curious young Alice tumbles into the burrow and enters the merry, madcap world of Wonderland full of whimsical escapades."
+  },
+  {
+    "id": 86847,
+    "title": "Mirzapur",
+    "clean_title": "Mirzapur",
+    "media_type": "tv",
+    "poster": "https://image.tmdb.org/t/p/w500/nm9e6j57nF8q4q2uN13jB8f9V.jpg",
+    "rating": 8.5,
+    "year": "2018",
+    "badge": "Superhit",
+    "country": "India",
+    "category": "Hindi",
+    "language": "Hindi",
+    "languages": [
+      "Hindi"
+    ],
+    "genres": [
+      "Crime",
+      "Action",
+      "Drama"
+    ],
+    "overview": "The iron-fisted Akhandanand Tripathi is a millionaire carpet exporter and the mafia don of Mirzapur."
+  },
+  {
+    "id": 100757,
+    "title": "Panchayat",
+    "clean_title": "Panchayat",
+    "media_type": "tv",
+    "poster": "https://image.tmdb.org/t/p/w500/7a57aYtTz8vF2VwKj5Hn5mH6J6k.jpg",
+    "rating": 8.9,
+    "year": "2020",
+    "badge": "All Time Hit",
+    "country": "India",
+    "category": "Hindi",
+    "language": "Hindi",
+    "languages": [
+      "Hindi"
+    ],
+    "genres": [
+      "Comedy",
+      "Drama"
+    ],
+    "overview": "An engineering graduate joins as a Panchayat secretary in a remote village due to lack of better job options."
+  },
+  {
+    "id": 76479,
+    "title": "The Boys",
+    "clean_title": "The Boys",
+    "media_type": "tv",
+    "poster": "https://image.tmdb.org/t/p/w500/2zmTngn1tYC1AvfnNDBpQI4By1z.jpg",
+    "rating": 8.4,
+    "year": "2019",
+    "badge": "Top Rated",
+    "country": "USA",
+    "category": "Hollywood",
+    "language": "English",
+    "languages": [
+      "English"
+    ],
+    "genres": [
+      "Sci-Fi",
+      "Action"
+    ],
+    "overview": "A group of vigilantes set out to take down corrupt superheroes who abuse their superpowers."
+  },
+  {
+    "id": 71446,
+    "title": "Money Heist",
+    "clean_title": "Money Heist",
+    "media_type": "tv",
+    "poster": "https://image.tmdb.org/t/p/w500/reEMJA1uzscCbk5rSXGno05ukAO.jpg",
+    "rating": 8.2,
+    "year": "2017",
+    "badge": "Worldwide Hit",
+    "country": "Spain",
+    "category": "Hollywood",
+    "language": "Spanish",
+    "languages": [
+      "Spanish",
+      "English"
+    ],
+    "genres": [
+      "Crime",
+      "Drama"
+    ],
+    "overview": "To carry out the biggest heist in history, a mysterious man called The Professor recruits a band of eight robbers."
+  },
+  {
+    "id": 119051,
+    "title": "Wednesday",
+    "clean_title": "Wednesday",
+    "media_type": "tv",
+    "poster": "https://image.tmdb.org/t/p/w500/9PFonB99qQeFLDc6um9V6dqQ3xP.jpg",
+    "rating": 8.5,
+    "year": "2022",
+    "badge": "Mega Hit",
+    "country": "USA",
+    "category": "Hollywood",
+    "language": "English",
+    "languages": [
+      "English"
+    ],
+    "genres": [
+      "Fantasy",
+      "Comedy",
+      "Mystery"
+    ],
+    "overview": "Wednesday Addams investigates a murder spree while making new friends and foes at Nevermore Academy."
+  },
+  {
+    "id": 216390,
+    "title": "Death's Game",
+    "clean_title": "Death's Game",
+    "media_type": "tv",
+    "poster": "https://image.tmdb.org/t/p/w500/3Zp3McfCqZk6bWq9oM3lYqf9u4q.jpg",
+    "rating": 8.6,
+    "year": "2023",
+    "badge": "Superhit K-Drama",
+    "country": "Korea",
+    "category": "K-Drama",
+    "language": "Korean",
+    "languages": [
+      "Korean"
+    ],
+    "genres": [
+      "Fantasy",
+      "Drama",
+      "Thriller"
+    ],
+    "overview": "Facing death, Choi Yi-jae is challenged by Death itself to experience 12 different lives and deaths."
+  },
+  {
+    "id": 200710,
+    "tmdb_id": 200709,
+    "title": "Weak Hero [English Dub]",
+    "clean_title": "Weak Hero",
+    "media_type": "tv",
+    "poster": "https://image.tmdb.org/t/p/w500/hS9VVF5ffTVWNoC9B48QNsZFGy9.jpg",
+    "rating": 8.4,
+    "year": "2025",
+    "badge": "English S1",
+    "country": "Korea",
+    "category": "K-Drama",
+    "language": "English",
+    "languages": [
+      "English"
+    ],
+    "genres": [
+      "Action",
+      "Drama"
+    ],
+    "overview": "With the aid of unexpected friends, a gifted but introverted student confronts bullies and violent foes."
+  },
+  {
+    "id": 200711,
+    "tmdb_id": 200709,
+    "title": "Weak Hero Class 1",
+    "clean_title": "Weak Hero Class 1",
+    "media_type": "tv",
+    "poster": "https://image.tmdb.org/t/p/w500/98xLhLSp4Cj9v9tXv2qR3v4w1e2.jpg",
+    "rating": 8.5,
+    "year": "2025",
+    "badge": "Korea",
+    "country": "Korea",
+    "category": "K-Drama",
+    "language": "Korean",
+    "languages": [
+      "Korean"
+    ],
+    "genres": [
+      "Action",
+      "Drama"
+    ],
+    "overview": "Weak Hero Class 1 authentic Korean broadcast."
   }
 ]

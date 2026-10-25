@@ -106,34 +106,88 @@ body {
 .search-box {
   position: relative;
   flex: 1;
-  max-width: 480px;
+  max-width: 560px;
+  margin: 0 16px;
+}
+
+.search-form {
+  display: flex;
+  align-items: stretch;
+  position: relative;
+  width: 100%;
+  height: 46px;
+  background: #ffffff;
+  border-radius: 9999px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.28);
+  overflow: hidden;
+  transition: box-shadow 0.2s ease, transform 0.15s ease;
+}
+
+.search-form:focus-within {
+  box-shadow: 0 0 0 3px rgba(243, 114, 18, 0.35), 0 6px 20px rgba(0, 0, 0, 0.35);
 }
 
 .search-input {
-  width: 100%;
-  padding: 10px 16px 10px 42px;
-  background: #081a36;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 24px;
-  color: #ffffff;
-  font-size: 14px;
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0 16px 0 26px;
+  background: transparent;
+  border: none;
   outline: none;
-  transition: all 0.2s;
+  color: #0f172a;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: inherit;
 }
 
-.search-input:focus {
-  border-color: #f97316;
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.18);
-  background: #0d2346;
-}
-
-.search-icon {
-  position: absolute;
-  left: 14px;
-  top: 50%;
-  transform: translateY(-50%);
+.search-input::placeholder {
   color: #64748b;
-  pointer-events: none;
+  font-size: 15px;
+  font-weight: 400;
+  opacity: 1;
+}
+
+.search-clear-btn {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  justifyContent: center;
+  transition: color 0.15s;
+}
+
+.search-clear-btn:hover {
+  color: #0f172a;
+}
+
+.search-submit-btn {
+  border: none;
+  outline: none;
+  background: linear-gradient(90deg, #f37212 0%, #eb5234 45%, #de2865 100%);
+  color: #ffffff;
+  padding: 0 28px;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  user-select: none;
+  white-space: nowrap;
+  transition: filter 0.2s ease, opacity 0.2s ease;
+}
+
+.search-submit-btn:hover {
+  filter: brightness(1.08);
+}
+
+.search-submit-btn:active {
+  filter: brightness(0.95);
 }
 
 .search-dropdown {
@@ -418,17 +472,15 @@ body {
   right: -20px;
 }
 
-/* Movie Card */
+/* Movie Card (Exact Match to User Screenshot) */
 .movie-card {
   flex: 0 0 calc(100% / 7 - 14px);
   min-width: 170px;
-  background: #081a36;
-  border-radius: 14px;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: transparent;
+  border-radius: 12px;
   text-decoration: none;
   color: #ffffff;
-  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.22s ease;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -436,8 +488,6 @@ body {
 
 .movie-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.6);
-  border-color: rgba(249, 115, 22, 0.4);
 }
 
 .poster-wrap {
@@ -445,80 +495,95 @@ body {
   width: 100%;
   aspect-ratio: 2 / 3;
   background: #0d2346;
+  border-radius: 12px;
   overflow: hidden;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.movie-card:hover .poster-wrap {
+  border-color: rgba(249, 115, 22, 0.45);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7);
 }
 
 .poster-img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s;
+  display: block;
+  transition: transform 0.35s ease;
 }
 
 .movie-card:hover .poster-img {
-  transform: scale(1.05);
+  transform: scale(1.06);
 }
 
-.card-badge {
+/* Top-Right Pill Badge (English S1, Hindi S1-S2, Korea) */
+.card-top-badge {
   position: absolute;
   top: 8px;
-  left: 8px;
-  background: rgba(8, 26, 54, 0.85);
-  backdrop-filter: blur(4px);
+  right: 8px;
+  z-index: 3;
+  background: #e11d48;
   color: #ffffff;
   font-size: 11px;
   font-weight: 700;
   padding: 3px 8px;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.2px;
+  white-space: nowrap;
 }
 
-.card-rating {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  width: 32px;
-  height: 32px;
+/* Meta Row with Overlapping Circular Rating Badge & Year */
+.card-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: -16px;
+  padding: 0 8px;
+  position: relative;
+  z-index: 4;
+}
+
+/* Circular Rating Badge (White background, Green ring stroke, Dark font) */
+.card-rating-circle {
+  width: 33px;
+  height: 33px;
   border-radius: 50%;
-  background: #041226;
-  color: #ffffff;
-  font-size: 11px;
+  background: #ffffff;
+  border: 2.5px solid #22c55e;
+  color: #0f172a;
+  font-size: 11.5px;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2.5px solid #00e676;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.55);
 }
 
-.card-rating.yellow {
-  border-color: #facc15;
+.card-year {
+  font-size: 13px;
+  font-weight: 600;
+  color: #94a3b8;
+  margin-top: 10px;
 }
 
-.card-rating.orange {
-  border-color: #f97316;
-}
-
-.card-body {
-  padding: 10px 12px 14px;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-.card-title {
-  font-size: 14px;
+/* Card Title */
+.movie-card .card-title {
+  font-size: 14.5px;
   font-weight: 700;
+  color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  margin-bottom: 4px;
+  padding: 6px 6px 6px;
+  transition: color 0.15s;
 }
 
-.card-meta {
-  font-size: 12px;
-  color: #64748b;
-  display: flex;
-  justify-content: space-between;
+.movie-card:hover .card-title {
+  color: #38bdf8;
 }
 
 /* Movie Grid */
@@ -534,6 +599,21 @@ body {
   .movie-card { flex: 0 0 calc(100% / 5 - 14px); }
 }
 @media (max-width: 768px) {
+  .nav-content { flex-wrap: wrap; }
+  .search-box {
+    order: 3;
+    width: 100%;
+    max-width: 100%;
+    margin: 8px 0 0 0;
+  }
+  .search-input {
+    font-size: 14px;
+    padding: 0 12px 0 18px;
+  }
+  .search-submit-btn {
+    padding: 0 20px;
+    font-size: 14px;
+  }
   .movie-grid { grid-template-columns: repeat(3, 1fr); }
   .movie-card { flex: 0 0 calc(100% / 3 - 10px); }
   .hero-banner { height: 400px; padding: 24px; }
@@ -545,6 +625,91 @@ body {
 }
 
 /* Cinema Watch Page */
+.cinema-player-layout {
+  display: flex;
+  gap: 16px;
+  align-items: stretch;
+  margin-bottom: 16px;
+}
+
+.cinema-video-box {
+  flex: 1;
+  min-width: 0;
+  background: #000000;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  aspect-ratio: 16 / 9;
+  position: relative;
+}
+
+.cinema-episodes-panel {
+  width: 320px;
+  flex-shrink: 0;
+  background: #081325;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+@media (max-width: 960px) {
+  .cinema-player-layout {
+    flex-direction: column;
+  }
+  .cinema-episodes-panel {
+    width: 100%;
+  }
+}
+
+/* Fast Iframe Loading Overlay */
+.iframe-fast-loader {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  background: #020916;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justifyContent: center;
+  pointer-events: auto;
+}
+
+.fast-loader-spinner {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #38bdf8;
+  border-right-color: #ec4899;
+  animation: fastSpin 0.75s linear infinite;
+}
+
+@keyframes fastSpin {
+  to { transform: rotate(360deg); }
+}
+
+.auto-failover-pill {
+  margin-top: 14px;
+  background: linear-gradient(90deg, #f97316 0%, #ec4899 100%);
+  color: #ffffff;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+  transition: transform 0.15s, filter 0.15s;
+}
+
+.auto-failover-pill:hover {
+  filter: brightness(1.1);
+  transform: scale(1.03);
+}
+
 .player-container {
   background: #020916;
   border-radius: 16px;
@@ -694,3 +859,172 @@ body {
 .video-js .vjs-load-progress {
   background-color: rgba(255, 255, 255, 0.4) !important;
 }
+
+/* Cineverse Spinning Cosmic Logo Animation (Hover & Loading Effect) */
+@keyframes cineverseOrbitSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes cineverseOrbitReverse {
+  0% { transform: rotate(360deg); }
+  100% { transform: rotate(0deg); }
+}
+
+@keyframes cineversePulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 25px rgba(217, 70, 239, 0.5), 0 0 60px rgba(56, 189, 248, 0.35);
+    transform: scale(1);
+  }
+  50% {
+    box-shadow: 0 0 45px rgba(217, 70, 239, 0.9), 0 0 85px rgba(56, 189, 248, 0.7);
+    transform: scale(1.06);
+  }
+}
+
+.cineverse-hover-hub {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cineverse-orbit-ring {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 2px dashed rgba(56, 189, 248, 0.6);
+  animation: cineverseOrbitSpin 6s linear infinite;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.cineverse-orbit-ring-glow {
+  position: absolute;
+  inset: -16px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: #ec4899;
+  border-bottom-color: #38bdf8;
+  animation: cineverseOrbitReverse 4s linear infinite;
+  opacity: 0.75;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.cineverse-center-logo {
+  width: 76px;
+  height: 76px;
+  border-radius: 20px;
+  box-shadow: 0 0 30px rgba(217, 70, 239, 0.65), 0 0 60px rgba(56, 189, 248, 0.45);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  object-fit: cover;
+  transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+  z-index: 2;
+  animation: cineversePulseGlow 3s ease-in-out infinite;
+}
+
+/* Hover Acceleration Effect (Spinning Cineverse Logo) */
+.cineverse-hover-hub:hover .cineverse-orbit-ring {
+  inset: -12px;
+  border-color: #38bdf8;
+  border-style: solid;
+  border-width: 3px;
+  border-top-color: #facc15;
+  animation: cineverseOrbitSpin 1.8s linear infinite;
+  filter: drop-shadow(0 0 14px #38bdf8);
+}
+
+.cineverse-hover-hub:hover .cineverse-orbit-ring-glow {
+  inset: -22px;
+  border-top-color: #f43f5e;
+  border-bottom-color: #a855f7;
+  border-width: 3px;
+  animation: cineverseOrbitReverse 1.4s linear infinite;
+  opacity: 1;
+  filter: drop-shadow(0 0 18px #ec4899);
+}
+
+.cineverse-hover-hub:hover .cineverse-center-logo {
+  transform: rotate(360deg) scale(1.15);
+  box-shadow: 0 0 50px rgba(236, 72, 153, 0.95), 0 0 95px rgba(56, 189, 248, 0.85);
+  border-color: #ffffff;
+}
+
+.cineverse-play-badge {
+  position: absolute;
+  z-index: 3;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgba(15, 23, 42, 0.85);
+  border: 2px solid #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+  transition: all 0.3s ease;
+}
+
+.cineverse-hover-hub:hover .cineverse-play-badge {
+  transform: scale(1.25);
+  background: #22c55e;
+  border-color: #86efac;
+  box-shadow: 0 0 20px #22c55e;
+}
+
+/* =========================================================================
+   Video.js Custom Cineverse Dark Skin (Pillar C)
+   ========================================================================= */
+.vjs-cineverse-skin.video-js {
+  font-family: inherit;
+  color: #ffffff;
+  background-color: #000000;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.vjs-cineverse-skin .vjs-big-play-button {
+  background: rgba(14, 165, 233, 0.85) !important;
+  border: 2px solid #38bdf8 !important;
+  border-radius: 50% !important;
+  width: 70px !important;
+  height: 70px !important;
+  line-height: 66px !important;
+  margin-top: -35px !important;
+  margin-left: -35px !important;
+  box-shadow: 0 0 30px rgba(56, 189, 248, 0.6) !important;
+  transition: all 0.25s ease !important;
+}
+
+.vjs-cineverse-skin:hover .vjs-big-play-button {
+  background: #0284c7 !important;
+  transform: scale(1.1) !important;
+  box-shadow: 0 0 45px rgba(56, 189, 248, 0.9) !important;
+}
+
+.vjs-cineverse-skin .vjs-control-bar {
+  background: linear-gradient(180deg, transparent 0%, rgba(4, 14, 30, 0.95) 100%) !important;
+  height: 52px !important;
+  padding: 0 10px !important;
+}
+
+.vjs-cineverse-skin .vjs-play-progress {
+  background: linear-gradient(90deg, #38bdf8 0%, #00e676 100%) !important;
+}
+
+.vjs-cineverse-skin .vjs-volume-level {
+  background: #38bdf8 !important;
+}
+
+.vjs-cineverse-skin .vjs-slider {
+  background-color: rgba(255, 255, 255, 0.2) !important;
+  border-radius: 3px !important;
+}
+

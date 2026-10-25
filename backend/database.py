@@ -67,23 +67,6 @@ def init_db():
         except Exception as e:
             pass
     
-    # Seed high quality open test streams for initial verification
-    seed_streams = [
-        (19995, "Avatar", "hls", "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", 1),
-        (233347, "Study Group", "hls", "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4", 1),
-        (157336, "Interstellar", "hls", "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4", 1),
-        (299536, "Avengers: Infinity War", "hls", "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", 1),
-        (999001, "Big Buck Bunny (Official 1080p HLS)", "hls", "https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8", 1),
-        (999002, "Sintel (4K Open Movie)", "mp4", "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4", 1),
-        (999003, "Tears of Steel (Sci-Fi Film)", "mp4", "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4", 1),
-        (999004, "Elephants Dream (Open Animation)", "mp4", "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4", 1)
-    ]
-    for tmdb_id, title, p_type, p_url, is_avail in seed_streams:
-        cursor.execute("""
-        INSERT OR IGNORE INTO video_catalog (tmdb_id, title, playback_type, playback_url, is_available)
-        VALUES (?, ?, ?, ?, ?)
-        """, (tmdb_id, title, p_type, p_url, is_avail))
-
     conn.commit()
     conn.close()
 

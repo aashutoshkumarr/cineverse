@@ -1,11 +1,39 @@
+# Python & Virtual Environments
 Lib/
 Scripts/
 pyvenv.cfg
+__pycache__/
+*.py[cod]
+*$py.class
+*.sqlite3
+*.db
+backend/app.db
+cineverse.db
+
+# Large Data & ML Models (>100MB rejected by GitHub)
+similarity.pkl
+*.pkl
+*.csv
+share/
+etc/
+CACHEDIR.TAG
+
+# Node & Frontend
 node_modules/
 frontend/node_modules/
 frontend/dist/
-__pycache__/
-*.pyc
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment & Logs
 .env
-backend/app.db
-.git/
+*.log
+giti
+
+# Temporary / Diagnostic scripts
+test_embeds*.py
+test_more_embeds.py
+build_*catalog.py
+check_netmirror.py
+fetch_posters_parallel.py

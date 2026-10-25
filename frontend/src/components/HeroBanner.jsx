@@ -31,7 +31,7 @@ export default function HeroBanner({ movie }) {
         </div>
         <p className="hero-desc">{movie.overview}</p>
         <div className="hero-buttons">
-          <Link to={`/watch/${movie.id}?type=${movie.media_type || 'movie'}`} className="btn-primary">
+          <Link to={`/watch/${movie.id}?type=${movie.media_type || 'movie'}&watch=1`} className="btn-primary">
             <Play size={18} fill="#ffffff" /> Watch Now
           </Link>
           <Link to={`/watch/${movie.id}?type=${movie.media_type || 'movie'}`} className="btn-secondary">
