@@ -401,15 +401,20 @@ export default function WatchPage() {
                       <div style={{ fontSize: "12px", color: "#38bdf8", marginTop: "4px" }}>
                         ⚡ Optimizing high-speed 1080p stream
                       </div>
-                      {showSlowWarning && (
+                    {showSlowWarning && (
+                      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "8px" }}>
                         <button
                           type="button"
                           onClick={handleNextServer}
                           className="auto-failover-pill"
                         >
-                          ⚡ Server slow? Click to Auto-Switch to Server {((activeServer + 1) % (streaming_servers.length || 10)) + 1}
+                          ⚡ Server taking too long? Click to Switch to Server {((activeServer + 1) % (streaming_servers.length || 10)) + 1}
                         </button>
-                      )}
+                        <span style={{ fontSize: "11px", color: "#94a3b8" }}>
+                          Tip: Different servers host streams from different global CDN locations.
+                        </span>
+                      </div>
+                    )}
                     </div>
                   )}
                   <iframe

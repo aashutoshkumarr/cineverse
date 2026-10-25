@@ -33,6 +33,21 @@ export default function VideoPlayer({
   const [errorMessage, setErrorMessage] = useState("");
   const controlsTimeoutRef = useRef(null);
 
+  // Keep latest onProgress in ref to avoid re-initializing video on parent re-renders
+  const onProgressRef = useRef(onProgress);
+  useEffect(() => {
+    onProgressRef.current = onProgress;
+  }, [onProgress]);
+
+  // Clean up controls timer on unmount
+  useEffect(() => {
+    return () => {
+      if (controlsTimeoutRef.current) {
+        clearTimeout(controlsTimeoutRef.current);
+      }
+    };
+  }, []);
+
   useEffect(() => {
     const video = videoRef.current;
     if (!video || !src) return;
@@ -120,9 +135,9 @@ export default function VideoPlayer({
       setCurrentTime(curr);
       setDuration(dur);
 
-      if (onProgress && Math.abs(curr - lastSavedTime.current) > 5) {
+      if (onProgressRef.current && Math.abs(curr - lastSavedTime.current) > 5) {
         lastSavedTime.current = curr;
-        onProgress(curr, dur);
+        onProgressRef.current(curr, dur);
       }
     };
 
@@ -173,7 +188,7 @@ export default function VideoPlayer({
         hlsRef.current = null;
       }
     };
-  }, [src, initialTime, onProgress]);
+  }, [src, initialTime]);
 
   const togglePlay = () => {
     if (!videoRef.current) return;

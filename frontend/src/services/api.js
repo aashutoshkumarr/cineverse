@@ -1,76 +1,151 @@
-const API_BASE = "http://127.0.0.1:8000/api";
+// Dynamic API Base URL: Uses VITE_API_BASE_URL if configured, otherwise falls back to current hostname on port 8000
+const getApiBase = () => {
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  if (typeof window !== "undefined" && window.location && window.location.hostname) {
+    // If accessing via local IP (e.g. 192.168.x.x or phone), connect to backend on same host
+    return `http://${window.location.hostname}:8000/api`;
+  }
+  return "http://127.0.0.1:8000/api";
+};
+
+const API_BASE = getApiBase();
 
 export async function fetchHealth() {
-  const res = await fetch(`${API_BASE}/health`);
-  return res.json();
+  try {
+    const res = await fetch(`${API_BASE}/health`);
+    if (!res.ok) throw new Error("Health check failed");
+    return await res.json();
+  } catch (err) {
+    console.error("fetchHealth error:", err);
+    return { status: "offline", total_catalog: 0 };
+  }
 }
 
 export async function fetchMovies(page = 1, limit = 24, country = "All", category = "All", language = "All") {
-  const params = new URLSearchParams({
-    page: String(page),
-    limit: String(limit),
-    country,
-    category,
-    language
-  });
-  const res = await fetch(`${API_BASE}/movies?${params}`);
-  return res.json();
+  try {
+    const params = new URLSearchParams({
+      page: String(page),
+      limit: String(limit),
+      country,
+      category,
+      language
+    });
+    const res = await fetch(`${API_BASE}/movies?${params}`);
+    if (!res.ok) throw new Error("Failed to fetch movies");
+    return await res.json();
+  } catch (err) {
+    console.error("fetchMovies error:", err);
+    return { results: [], total: 0, page, has_more: false };
+  }
 }
 
 export async function fetchShelves() {
-  const res = await fetch(`${API_BASE}/shelves`);
-  return res.json();
+  try {
+    const res = await fetch(`${API_BASE}/shelves`);
+    if (!res.ok) throw new Error("Failed to fetch shelves");
+    return await res.json();
+  } catch (err) {
+    console.error("fetchShelves error:", err);
+    return [];
+  }
 }
 
 export async function searchMovies(q) {
-  const res = await fetch(`${API_BASE}/search?q=${encodeURIComponent(q)}`);
-  return res.json();
+  try {
+    const res = await fetch(`${API_BASE}/search?q=${encodeURIComponent(q)}`);
+    if (!res.ok) throw new Error("Search failed");
+    return await res.json();
+  } catch (err) {
+    console.error("searchMovies error:", err);
+    return { results: [], count: 0 };
+  }
 }
 
 export async function fetchMovieDetail(id, type = "", s = 1, e = 1) {
-  const typeQuery = (type && type !== "null" && type !== "undefined") ? `&type=${type}` : "";
-  const res = await fetch(`${API_BASE}/movie/${id}?s=${s}&e=${e}${typeQuery}`);
-  return res.json();
+  try {
+    const typeQuery = (type && type !== "null" && type !== "undefined") ? `&type=${type}` : "";
+    const res = await fetch(`${API_BASE}/movie/${id}?s=${s}&e=${e}${typeQuery}`);
+    if (!res.ok) throw new Error("Failed to fetch movie detail");
+    return await res.json();
+  } catch (err) {
+    console.error("fetchMovieDetail error:", err);
+    return null;
+  }
 }
 
 export async function fetchRecommendations(id, title) {
-  const params = new URLSearchParams();
-  if (title) params.append("title", title);
-  const res = await fetch(`${API_BASE}/recommend/${id}?${params}`);
-  return res.json();
+  try {
+    const params = new URLSearchParams();
+    if (title) params.append("title", title);
+    const res = await fetch(`${API_BASE}/recommend/${id}?${params}`);
+    if (!res.ok) throw new Error("Failed to fetch recommendations");
+    return await res.json();
+  } catch (err) {
+    console.error("fetchRecommendations error:", err);
+    return [];
+  }
 }
 
 export async function fetchWatchlist() {
-  const res = await fetch(`${API_BASE}/watchlist`);
-  return res.json();
+  try {
+    const res = await fetch(`${API_BASE}/watchlist`);
+    if (!res.ok) throw new Error("Failed to fetch watchlist");
+    return await res.json();
+  } catch (err) {
+    console.error("fetchWatchlist error:", err);
+    return [];
+  }
 }
 
 export async function addToWatchlist(item) {
-  const res = await fetch(`${API_BASE}/watchlist`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(item)
-  });
-  return res.json();
+  try {
+    const res = await fetch(`${API_BASE}/watchlist`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(item)
+    });
+    return await res.json();
+  } catch (err) {
+    console.error("addToWatchlist error:", err);
+    return null;
+  }
 }
 
 export async function removeFromWatchlist(id) {
-  const res = await fetch(`${API_BASE}/watchlist/${id}`, { method: "DELETE" });
-  return res.json();
+  try {
+    const res = await fetch(`${API_BASE}/watchlist/${id}`, { method: "DELETE" });
+    return await res.json();
+  } catch (err) {
+    console.error("removeFromWatchlist error:", err);
+    return null;
+  }
 }
 
 export async function fetchHistory() {
-  const res = await fetch(`${API_BASE}/history`);
-  return res.json();
+  try {
+    const res = await fetch(`${API_BASE}/history`);
+    if (!res.ok) throw new Error("Failed to fetch history");
+    return await res.json();
+  } catch (err) {
+    console.error("fetchHistory error:", err);
+    return [];
+  }
 }
 
 export async function addToHistory(item) {
-  const res = await fetch(`${API_BASE}/history`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(item)
-  });
-  return res.json();
+  try {
+    const res = await fetch(`${API_BASE}/history`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(item)
+    });
+    return await res.json();
+  } catch (err) {
+    console.error("addToHistory error:", err);
+    return null;
+  }
 }
 
 export async function updatePlaybackProgress(tmdbId, progressSeconds, durationSeconds) {
