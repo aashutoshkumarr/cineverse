@@ -1,8 +1,13 @@
+import os
 import socket
 import requests
 import json
 import urllib.parse
 from concurrent.futures import ThreadPoolExecutor
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # -----------------------------
 # Dynamic CloudFront IP DNS Patch
@@ -25,7 +30,7 @@ def patched_getaddrinfo(host, port, family=0, type=0, proto=0, flags=0):
     return _real_getaddrinfo(host, port, family, type, proto, flags)
 socket.getaddrinfo = patched_getaddrinfo
 
-TMDB_API_KEY = "8265bd1679663a7ea12ac168da84d2e8"
+TMDB_API_KEY = os.getenv("TMDB_API_KEY", "")
 TMDB_BASE_URL = "https://api.themoviedb.org/3"
 TVMAZE_BASE_URL = "https://api.tvmaze.com"
 ANILIST_URL = "https://graphql.anilist.co"
