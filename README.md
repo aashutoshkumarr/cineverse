@@ -40,8 +40,8 @@
   </table>
 
   <br/>
-  <h3>♾️ Infinite Discovery Feed & Curated Shelves</h3>
-  <img src="docs/images/browse-preview.png" alt="Browse Continuous Discovery" width="95%" style="border-radius: 12px; border: 1px solid rgba(255,255,255,0.15);" />
+  <h3>⚡ End-to-End System Workflow & Component Architecture</h3>
+  <img src="docs/images/workflow-diagram.png" alt="Cineverse Workflow & Architecture Diagram" width="95%" style="border-radius: 14px; border: 1px solid rgba(255,255,255,0.18); box-shadow: 0 12px 35px rgba(0,0,0,0.7);" />
 </div>
 
 ---
