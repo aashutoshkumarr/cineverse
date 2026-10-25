@@ -74,6 +74,8 @@ class WatchItem(BaseModel):
 class ProgressUpdate(BaseModel):
     progress_seconds: float
     duration_seconds: float
+    season: Optional[int] = 1
+    episode: Optional[int] = 1
 
 class CustomStreamInput(BaseModel):
     tmdb_id: int
@@ -642,12 +644,22 @@ def add_history(item: WatchItem):
     return {"status": "success", "message": "History updated"}
 
 @app.post("/api/history/{tmdb_id}/progress")
-def update_playback_progress(tmdb_id: int, update: ProgressUpdate):
-    db.update_playback_progress(tmdb_id, update.progress_seconds, update.duration_seconds)
+def update_playback_progress(
+    tmdb_id: int,
+    update: ProgressUpdate,
+    x_user_id: Optional[str] = Header("default_user", alias="X-User-Id")
+):
+    db.update_playback_progress(
+        tmdb_id,
+        update.progress_seconds,
+        update.duration_seconds,
+        user_id=x_user_id or "default_user",
+        season=update.season or 1,
+        episode=update.episode or 1
+    )
     return {"status": "ok", "tmdb_id": tmdb_id, "progress": update.progress_seconds}
 
 @app.delete("/api/history")
-def clear_history():
-    db.clear_history()
-    return {"status": "success", "message": "History cleared"}
+def clear_history(x_user_id: Optional[str] = Header("default_user", alias="X-User-Id")):
+    db.clear_history(user_id=x_user_id or "default_user")
     return {"status": "success", "message": "History cleared"}
