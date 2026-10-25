@@ -9,9 +9,17 @@ from dotenv import load_dotenv
 load_dotenv()
 
 TMDB_API_KEY = os.getenv("TMDB_API_KEY", "")
+TMDB_READ_ACCESS_TOKEN = os.getenv("TMDB_READ_ACCESS_TOKEN", "")
 TMDB_BASE_URL = "https://api.themoviedb.org/3"
+TMDB_TIMEOUT = 2.5
 TVMAZE_BASE_URL = "https://api.tvmaze.com"
 ANILIST_URL = "https://graphql.anilist.co"
+
+def get_tmdb_headers():
+    headers = {"Accept": "application/json", "User-Agent": "Cineverse/2.0"}
+    if TMDB_READ_ACCESS_TOKEN:
+        headers["Authorization"] = f"Bearer {TMDB_READ_ACCESS_TOKEN}"
+    return headers
 
 # Genre mapping
 GENRE_MAP = {
@@ -83,7 +91,7 @@ def search_tmdb_multi(query):
             "page": 1,
             "include_adult": False
         }
-        res = requests.get(url, params=params, timeout=2.5)
+        res = requests.get(url, params=params, headers=get_tmdb_headers(), timeout=TMDB_TIMEOUT)
         if res.status_code == 200:
             results = res.json().get("results", [])
             items = []
@@ -124,7 +132,7 @@ def fetch_tmdb_recommendations(media_type, media_id):
     try:
         url = f"{TMDB_BASE_URL}/{media_type}/{media_id}/recommendations"
         params = {"api_key": TMDB_API_KEY, "language": "en-US", "page": 1}
-        res = requests.get(url, params=params, timeout=2.5)
+        res = requests.get(url, params=params, headers=get_tmdb_headers(), timeout=TMDB_TIMEOUT)
         results = []
         if res.status_code == 200:
             results = res.json().get("results", [])
@@ -132,7 +140,7 @@ def fetch_tmdb_recommendations(media_type, media_id):
         if not results:
             # Fallback to similar
             url_sim = f"{TMDB_BASE_URL}/{media_type}/{media_id}/similar"
-            res_sim = requests.get(url_sim, params=params, timeout=2.5)
+            res_sim = requests.get(url_sim, params=params, headers=get_tmdb_headers(), timeout=TMDB_TIMEOUT)
             if res_sim.status_code == 200:
                 results = res_sim.json().get("results", [])
 
@@ -198,7 +206,7 @@ def fetch_tmdb_discover(country="All", category="All", language="All", page=1):
             params["with_original_language"] = "en"
 
         url = f"{TMDB_BASE_URL}/discover/{media_type}"
-        res = requests.get(url, params=params, timeout=2.5)
+        res = requests.get(url, params=params, headers=get_tmdb_headers(), timeout=TMDB_TIMEOUT)
         if res.status_code == 200:
             results = res.json().get("results", [])
             items = []

@@ -269,7 +269,7 @@ class BoundedTTLCache:
         self.set(key, value)
 
 _extended_cache = BoundedTTLCache(maxsize=1000, ttl_seconds=7200)
-headers_tmdb = {"User-Agent": "Mozilla/5.0"}
+headers_tmdb = api.get_tmdb_headers()
 
 def format_release_date(date_str):
     if not date_str:
@@ -377,7 +377,7 @@ def fetch_tmdb_extended(movie_id, media_type="movie"):
                 "api_key": api.TMDB_API_KEY,
                 "append_to_response": "aggregate_credits,credits,videos"
             }
-            res = requests.get(url, params=params, headers=headers_tmdb, timeout=0.6)
+            res = requests.get(url, params=params, headers=headers_tmdb, timeout=2.0)
             if res.status_code == 200:
                 data = res.json()
                 cast_list = []
@@ -461,7 +461,7 @@ def fetch_season_episodes(tv_id: int, season_num: int):
         return _extended_cache[cache_k]
     try:
         url = f"{api.TMDB_BASE_URL}/tv/{tv_id}/season/{season_num}"
-        res = requests.get(url, params={"api_key": api.TMDB_API_KEY}, headers=headers_tmdb, timeout=0.6)
+        res = requests.get(url, params={"api_key": api.TMDB_API_KEY}, headers=headers_tmdb, timeout=2.0)
         if res.status_code == 200:
             s_data = res.json()
             p_path = s_data.get("poster_path")

@@ -50,7 +50,7 @@ def get_trailer_url(tmdb_id, media_type="movie", title=None):
     try:
         m_type = "movie" if media_type not in ["tv", "series"] else "tv"
         url = f"{TMDB_BASE_URL}/{m_type}/{tmdb_id}/videos"
-        res = requests.get(url, params={"api_key": TMDB_API_KEY}, timeout=0.6)
+        res = requests.get(url, params={"api_key": TMDB_API_KEY}, headers=api.get_tmdb_headers(), timeout=2.0)
         if res.status_code == 200:
             videos = res.json().get("results", [])
             for v in videos:
