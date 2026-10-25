@@ -25,11 +25,11 @@ class TestCineverseBackend(unittest.TestCase):
         m_servers = stream.get_streaming_servers(tmdb_id=550, media_type="movie")
         self.assertGreaterEqual(len(m_servers), 4, "Should have at least 4 active streaming mirrors")
         self.assertEqual(m_servers[0]["name"], "Server 1")
-        self.assertIn("vidsrc.su", m_servers[0]["url"])
+        self.assertIn("autoembed.co", m_servers[0]["url"])
 
         # Test TV servers with season and episode params
         tv_servers = stream.get_streaming_servers(tmdb_id=114472, media_type="tv", season=2, episode=3)
-        self.assertIn("114472/2/3", tv_servers[0]["url"])
+        self.assertIn("114472-2-3", tv_servers[0]["url"])
 
     def test_recommender_system(self):
         status = rec.get_recommender_status()

@@ -426,7 +426,7 @@ export default function WatchPage() {
                     src={currentEmbedUrl}
                     title={item.title}
                     style={{ width: "100%", height: "100%", border: "none", display: "block" }}
-                    referrerPolicy="origin"
+                    referrerPolicy="no-referrer"
                     loading="eager"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
                     allowFullScreen

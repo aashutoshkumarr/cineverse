@@ -130,18 +130,18 @@ def get_streaming_servers(tmdb_id, media_type="movie", season=1, episode=1, dire
         })
 
     # The top live, verified, ultra-fast full-length movie & series streaming servers
-    # Ranked strictly by live ping test: vidsrc_su, vidlink, vidsrc_pm, nontongo are 100% active (200 OK)
+    # Uses genuine multi-CDN provider diversity (AutoEmbed, VidSrc.to, 2Embed, SmashyStream, VidLink)
     mirrors = [
+        {"id": "autoembed", "url": f"https://autoembed.co/movie/tmdb/{tmdb_id}" if m_type == "movie" else f"https://autoembed.co/tv/tmdb/{tmdb_id}-{season}-{episode}"},
+        {"id": "vidsrc_to", "url": f"https://vidsrc.to/embed/movie/{tmdb_id}" if m_type == "movie" else f"https://vidsrc.to/embed/tv/{tmdb_id}/{season}/{episode}"},
+        {"id": "two_embed", "url": f"https://www.2embed.cc/embed/{tmdb_id}" if m_type == "movie" else f"https://www.2embed.cc/embedtv/{tmdb_id}?s={season}&e={episode}"},
+        {"id": "smashystream", "url": f"https://embed.smashystream.com/playere.php?tmdb={tmdb_id}" if m_type == "movie" else f"https://embed.smashystream.com/playere.php?tmdb={tmdb_id}&season={season}&episode={episode}"},
+        {"id": "two_embed_skin", "url": f"https://2embed.skin/embed/{tmdb_id}" if m_type == "movie" else f"https://2embed.skin/embedtv/{tmdb_id}?s={season}&e={episode}"},
+        {"id": "vidlink", "url": f"https://vidlink.pro/movie/{tmdb_id}" if m_type == "movie" else f"https://vidlink.pro/tv/{tmdb_id}/{season}/{episode}"},
         {"id": "vidsrc_su", "url": f"https://vidsrc.su/embed/{m_prefix}/{tmdb_id}{tv_suffix}"},
-        {"id": "vidlink", "url": f"https://vidlink.pro/{m_prefix}/{tmdb_id}{tv_suffix}"},
-        {"id": "vidsrc_pm", "url": f"https://vidsrc.pm/embed/{m_prefix}/{tmdb_id}{tv_suffix}"},
         {"id": "nontongo", "url": f"https://nontongo.win/embed/{m_prefix}/{tmdb_id}{tv_suffix}"},
-        {"id": "warezcdn", "url": f"https://embed.warezcdn.net/filme/{tmdb_id}" if m_type == "movie" else f"https://embed.warezcdn.net/serie/{tmdb_id}/{season}/{episode}"},
-        {"id": "vidsrc_net", "url": f"https://vidsrc.net/embed/{m_prefix}/{tmdb_id}{tv_suffix}"},
-        {"id": "two_embed", "url": f"https://www.2embed.cc/{'embedtv' if m_type == 'tv' else 'embed'}/{tmdb_id}{two_tv_suffix}"},
-        {"id": "two_embed_skin", "url": f"https://2embed.skin/{'embedtv' if m_type == 'tv' else 'embed'}/{tmdb_id}{two_tv_suffix}"},
-        {"id": "embed_su", "url": f"https://embed.su/embed/{m_prefix}/{tmdb_id}{tv_suffix}"},
-        {"id": "vidsrc_cc", "url": f"https://vidsrc.cc/v2/embed/{m_prefix}/{tmdb_id}{tv_suffix}"}
+        {"id": "vidsrc_pm", "url": f"https://vidsrc.pm/embed/{m_prefix}/{tmdb_id}{tv_suffix}"},
+        {"id": "warezcdn", "url": f"https://embed.warezcdn.net/filme/{tmdb_id}" if m_type == "movie" else f"https://embed.warezcdn.net/serie/{tmdb_id}/{season}/{episode}"}
     ]
 
     for m in mirrors:
