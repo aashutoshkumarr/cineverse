@@ -8,6 +8,11 @@
   <h1>C I N E V E R S E</h1>
   <p><b>Next-Generation Cinema & TV Series Streaming Platform with Hybrid ML Recommendations</b></p>
 
+  <p>
+    🚀 <b>Live Local Access URL:</b> 
+    <a href="http://localhost:3001"><b><code>http://localhost:3001</code></b></a>
+  </p>
+
   [![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
   [![FastAPI](https://img.shields.io/badge/FastAPI-0.109%2B-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
   [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev/)
