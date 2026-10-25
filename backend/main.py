@@ -1,10 +1,16 @@
 import os
 import sys
 import json
-from fastapi import FastAPI, Query, HTTPException, Body
+import re
+from urllib.parse import urlparse
+from fastapi import FastAPI, Query, HTTPException, Body, Header
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, HttpUrl
 from typing import Optional, List
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Add parent directory to path
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
@@ -17,12 +23,32 @@ from backend import streaming_service as stream
 
 app = FastAPI(title="Cineverse API", version="2.0.0")
 
-# Enable CORS for React frontend (Vite defaults to port 5173 or any port)
+# ---------------------------------------------------------
+# Secure CORS Configuration
+# Production-ready: Allows localhost dev ports and custom origins via env
+# Supports regex matching for local preview ports (3000-3005, 5173, etc.)
+# ---------------------------------------------------------
+custom_origins = os.getenv("ALLOWED_ORIGINS", "")
+allowed_origins_list = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://localhost:5173",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001",
+    "http://127.0.0.1:5173",
+]
+if custom_origins:
+    for origin in custom_origins.split(","):
+        o = origin.strip()
+        if o and o not in allowed_origins_list:
+            allowed_origins_list.append(o)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins_list,
+    allow_origin_regex=r"http://(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)(:\d+)?",
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -560,11 +586,28 @@ def get_recommendations(movie_id: int, title: Optional[str] = None):
     recs = rec.get_ml_recommendations(movie_id, title, limit=12)
     return {"movie_id": movie_id, "results": recs}
 
-# Direct Streaming Catalog Endpoints (Step 3 & 4)
+# Direct Streaming Catalog Endpoints (Protected by Admin API Key & URL validation)
 @app.post("/api/streams")
-def add_custom_stream(inp: CustomStreamInput):
+def add_custom_stream(
+    inp: CustomStreamInput,
+    x_admin_key: Optional[str] = Header(None, alias="X-Admin-Key")
+):
+    # 1. Admin Authentication Check
+    admin_secret = os.getenv("ADMIN_API_KEY")
+    if admin_secret:
+        if not x_admin_key or x_admin_key != admin_secret:
+            raise HTTPException(status_code=403, detail="Forbidden: Invalid or missing X-Admin-Key")
+    
+    # 2. URL Scheme Validation (Only allow secure http, https, hls streams)
+    parsed = urlparse(inp.playback_url)
+    if parsed.scheme not in ["http", "https"]:
+        raise HTTPException(status_code=400, detail="Invalid playback_url scheme. Only HTTP/HTTPS protocols allowed.")
+    if not parsed.netloc:
+        raise HTTPException(status_code=400, detail="Invalid playback_url host.")
+
+    # 3. Save to database
     db.set_video_stream(inp.tmdb_id, inp.title, inp.playback_type, inp.playback_url, 1, inp.subtitles)
-    return {"status": "success", "message": f"Authorized stream saved for {inp.title}"}
+    return {"status": "success", "message": f"Authorized stream registered for {inp.title}"}
 
 @app.get("/api/streams/{tmdb_id}")
 def get_stream(tmdb_id: int):
