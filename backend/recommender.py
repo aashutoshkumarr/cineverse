@@ -36,17 +36,27 @@ def load_ml_models():
     except Exception as e:
         print("ML load error:", e)
 
-def get_ml_recommendations(tmdb_id, title=None, limit=12):
+def get_recommender_status():
+    """Returns runtime diagnostic metrics about the ML model and fallback state."""
+    load_ml_models()
+    return {
+        "ml_model_loaded": bool(_ml_loaded and _movies_df is not None and _similarity is not None),
+        "ml_dataset_count": len(_movies_df) if _movies_df is not None else 0,
+        "curated_catalog_count": len(catalog_cache),
+        "primary_engine": "Cosine Similarity (TMDB 5000 Content Tags)" if _ml_loaded else "Heuristic Multi-Attribute Fallback"
+    }
+
+def get_recommendations_with_meta(tmdb_id, title=None, limit=12):
     """
-    Finds top similar movies using Cosine Similarity on content tags,
-    prioritizing movies that have authentic posters in our catalog.
-    Falls back seamlessly to intelligent genre/country/keyword matching from local 2,500 catalog.
-    Never returns generic fallback posters or missing posters.
+    Finds top similar movies and returns both the items and the engine used
+    ('ml_cosine' or 'heuristic_fallback').
     """
     load_ml_models()
     
     rec_items = []
     seen_ids = set()
+    engine_used = "heuristic_fallback"
+    
     if tmdb_id:
         try:
             seen_ids.add(int(tmdb_id))
@@ -86,6 +96,7 @@ def get_ml_recommendations(tmdb_id, title=None, limit=12):
                         if poster and "unsplash" not in poster:
                             rec_items.append(found)
                             seen_ids.add(found.get("id"))
+                            engine_used = "ml_cosine"
                             if len(rec_items) >= limit:
                                 break
         except Exception as e:
@@ -139,4 +150,10 @@ def get_ml_recommendations(tmdb_id, title=None, limit=12):
             if len(rec_items) >= limit:
                 break
 
-    return rec_items if rec_items else catalog_cache[:limit]
+    return (rec_items if rec_items else catalog_cache[:limit], engine_used)
+
+def get_ml_recommendations(tmdb_id, title=None, limit=12):
+    """Legacy helper returning just the recommendations list."""
+    items, _ = get_recommendations_with_meta(tmdb_id, title, limit)
+    return items
+

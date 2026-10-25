@@ -1,0 +1,14 @@
+{
+  "model_name": "Cineverse Content-Based Cosine Similarity Recommender",
+  "version": "2.0.0",
+  "generated_at": "2026-10-25T22:32:40.022979",
+  "algorithm": "Bag-of-Words (CountVectorizer) + Pairwise Cosine Similarity",
+  "dataset": "TMDB 5000 Movie Dataset (movies & credits merged)",
+  "vocabulary_features": 5000,
+  "total_indexed_titles": 4842,
+  "local_curated_catalog_titles": 2505,
+  "reproducible_training_command": "python train_model.py",
+  "evaluation_suite_command": "python evaluate_recommender.py",
+  "status_endpoint": "GET /api/recommend/status",
+  "average_latency_ms": 8.28
+}

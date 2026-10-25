@@ -583,10 +583,20 @@ def get_movie_detail(movie_id: int, type: Optional[str] = None, s: Optional[int]
         "recommendations": recs
     }
 
+@app.get("/api/recommend/status")
+def get_recommender_status():
+    """Returns runtime model health, metadata, and active recommendation engine."""
+    return rec.get_recommender_status()
+
 @app.get("/api/recommend/{movie_id}")
 def get_recommendations(movie_id: int, title: Optional[str] = None):
-    recs = rec.get_ml_recommendations(movie_id, title, limit=12)
-    return {"movie_id": movie_id, "results": recs}
+    recs, engine_used = rec.get_recommendations_with_meta(movie_id, title, limit=12)
+    return {
+        "movie_id": movie_id,
+        "engine_used": engine_used,
+        "count": len(recs),
+        "results": recs
+    }
 
 # Direct Streaming Catalog Endpoints (Protected by Admin API Key & URL validation)
 @app.post("/api/streams")
