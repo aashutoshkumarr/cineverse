@@ -63,26 +63,30 @@ export default function WatchPage() {
     if (watchFlag) setIsPlaying(true);
   }, [searchParams]);
 
+  // Record in watch history only when playback actually starts or is active (not on passive detail browsing)
+  useEffect(() => {
+    if (isPlaying && detail?.item) {
+      addToHistory({
+        id: detail.item.id,
+        title: detail.item.title,
+        poster: detail.item.poster,
+        year: detail.item.year,
+        rating: detail.item.rating,
+        media_type: detail.media_type || detail.item.media_type || "movie",
+        season: isTvSeries ? season : 1,
+        episode: isTvSeries ? episode : 1,
+        progress_seconds: detail.resume_seconds || 0,
+        duration_seconds: detail.duration_seconds || 0
+      }).catch(() => {});
+    }
+  }, [isPlaying, detail?.item?.id, season, episode]);
+
   useEffect(() => {
     setLoading(true);
     fetchMovieDetail(id, mediaTypeParam, season, episode)
       .then((data) => {
         setDetail(data);
         setPlayerMode("servers");
-
-        // Record in history automatically
-        if (data.item) {
-          addToHistory({
-            id: data.item.id,
-            title: data.item.title,
-            poster: data.item.poster,
-            year: data.item.year,
-            rating: data.item.rating,
-            media_type: data.media_type || data.item.media_type || "movie",
-            progress_seconds: data.resume_seconds || 0,
-            duration_seconds: data.duration_seconds || 0
-          }).catch(() => {});
-        }
       })
       .finally(() => setLoading(false));
   }, [id, mediaTypeParam, season, episode]);

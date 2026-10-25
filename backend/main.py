@@ -100,8 +100,8 @@ def health():
 
 @app.get("/api/movies")
 def get_movies(
-    page: int = 1,
-    limit: int = 24,
+    page: int = Query(1, ge=1, description="Page number (positive integer)"),
+    limit: int = Query(24, ge=1, le=100, description="Items per page (max 100)"),
     country: Optional[str] = "All",
     category: Optional[str] = "All",
     language: Optional[str] = "All"
@@ -230,9 +230,45 @@ def search(q: str = Query(..., min_length=1)):
     return {"query": q, "count": len(merged), "results": merged[:30]}
 
 import requests
+import time
 from datetime import datetime
 
-_extended_cache = {}
+# Bounded In-Memory Cache with TTL & Max Capacity to prevent memory leaks
+class BoundedTTLCache:
+    def __init__(self, maxsize=500, ttl_seconds=3600):
+        self.maxsize = maxsize
+        self.ttl = ttl_seconds
+        self._cache = {}
+
+    def get(self, key):
+        if key in self._cache:
+            val, expire_at = self._cache[key]
+            if time.time() < expire_at:
+                return val
+            del self._cache[key]
+        return None
+
+    def set(self, key, value):
+        if len(self._cache) >= self.maxsize:
+            # Drop oldest 20% entries
+            oldest_keys = sorted(self._cache.keys(), key=lambda k: self._cache[k][1])[:int(self.maxsize * 0.2)]
+            for k in oldest_keys:
+                self._cache.pop(k, None)
+        self._cache[key] = (value, time.time() + self.ttl)
+
+    def __contains__(self, key):
+        return self.get(key) is not None
+
+    def __getitem__(self, key):
+        v = self.get(key)
+        if v is None:
+            raise KeyError(key)
+        return v
+
+    def __setitem__(self, key, value):
+        self.set(key, value)
+
+_extended_cache = BoundedTTLCache(maxsize=1000, ttl_seconds=7200)
 headers_tmdb = {"User-Agent": "Mozilla/5.0"}
 
 def format_release_date(date_str):

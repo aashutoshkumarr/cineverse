@@ -328,6 +328,17 @@ Feel free to check out the [issues page](https://github.com/aashutoshkumarr/cine
 
 ---
 
+## ⚖️ Legal Disclaimer, Content Architecture & Media Attribution
+
+Cineverse is built as an educational and portfolio demonstration of modern full-stack media engineering, high-performance streaming architecture, and Machine Learning content recommendation systems.
+
+- **Metadata & Posters**: Movie, television series, and talent metadata are populated via [The Movie Database (TMDB) API](https://developer.themoviedb.org/) and [AniList API](https://graphql.anilist.co/). This product uses the TMDB API but is not endorsed or certified by TMDB.
+- **Trailers & Promos**: Official preview trailers are embedded directly from authorized promotional YouTube and CDN video channels.
+- **Streaming Mirror Architecture**: The multi-server fallback system is designed as a demonstration of content delivery network (CDN) failover engineering, adaptive client-side recovery, and multi-origin routing. For commercial production environments, operators should stream self-hosted or licensed catalog content (e.g. via Cloudflare Stream, AWS CloudFront, or Bitmovin) with DRM authorization.
+- **Viewing Providers**: Where full-length native streams are unavailable, Cineverse integrates TMDB Watch Providers to direct users to authorized official platforms (Netflix, Prime Video, Apple TV, Disney+).
+
+---
+
 ## 📄 License
 
 This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
