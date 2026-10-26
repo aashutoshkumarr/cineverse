@@ -46,7 +46,7 @@ if custom_origins:
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins_list,
-    allow_origin_regex=r"http://(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)(:\d+)?",
+    allow_origin_regex=r"(http://(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)(:\d+)?)|(https://.*\.vercel\.app)|(https://.*\.onrender\.com)",
     allow_credentials=True,
     allow_methods=["GET", "POST", "DELETE", "OPTIONS"],
     allow_headers=["*"],
@@ -709,3 +709,26 @@ def update_playback_progress(
 def clear_history(x_user_id: Optional[str] = Header("default_user", alias="X-User-Id")):
     db.clear_history(user_id=x_user_id or "default_user")
     return {"status": "success", "message": "History cleared"}
+
+# ---------------------------------------------------------
+# Production SPA Frontend Serving (All-in-One Deployment)
+# Serves built React frontend from frontend/dist if available
+# ---------------------------------------------------------
+dist_dir = os.path.join(BASE_DIR, "frontend", "dist")
+if os.path.exists(dist_dir):
+    from fastapi.staticfiles import StaticFiles
+    from starlette.responses import FileResponse
+
+    assets_dir = os.path.join(dist_dir, "assets")
+    if os.path.exists(assets_dir):
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        if full_path.startswith("api"):
+            raise HTTPException(status_code=404, detail="API endpoint not found")
+        file_path = os.path.join(dist_dir, full_path)
+        if os.path.isfile(file_path):
+            return FileResponse(file_path)
+        return FileResponse(os.path.join(dist_dir, "index.html"))
+
