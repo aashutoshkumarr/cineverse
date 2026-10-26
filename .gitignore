@@ -37,3 +37,6 @@ test_more_embeds.py
 build_*catalog.py
 check_netmirror.py
 fetch_posters_parallel.py
+
+.vercel
+.env*

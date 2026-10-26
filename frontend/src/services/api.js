@@ -4,6 +4,9 @@ const getApiBase = () => {
     return import.meta.env.VITE_API_BASE_URL;
   }
   if (typeof window !== "undefined" && window.location && window.location.hostname) {
+    if (window.location.hostname.includes("vercel.app") || window.location.hostname.includes("onrender.com")) {
+      return "/api";
+    }
     // If accessing via local IP (e.g. 192.168.x.x or phone), connect to backend on same host
     return `http://${window.location.hostname}:8000/api`;
   }
